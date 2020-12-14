@@ -85,7 +85,18 @@ typedef struct LilConnector {
     LilCrtc* crtc;
 
     bool on_pch;
+
+    //this field is changed by lil_process_interrupt
+    //indicates whether vertical sync/blank is happening for this connector.
+    bool vsync;
+    bool vblank;
 } LilConnector;
+
+typedef enum LilInterruptEnableMask {
+    VBLANK_A, VSYNC_A,
+    VBLANK_B, VSYNC_B,
+    VBLANK_C, VSYNC_C
+} LilInterruptEnableMask;
 
 typedef struct LilGpu {
     uint32_t num_connectors;
@@ -94,6 +105,9 @@ typedef struct LilGpu {
     uintptr_t gpio_start;
     uintptr_t mmio_start;
     uintptr_t vram;
+
+    void (*enable_display_interrupt) (struct LilGpu* gpu, uint32_t enable_mask);
+    void (*process_interrupt) (struct LilGpu* gpu);
 } LilGpu;
 
 /*
@@ -107,3 +121,6 @@ typedef struct LilGpu {
  * - call commit_modeset
  */
 void lil_init_gpu(LilGpu* ret, void* pci_device);
+
+typedef struct LilIrqType {
+} LilIrqType;

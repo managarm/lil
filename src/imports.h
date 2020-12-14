@@ -14,3 +14,5 @@ __attribute__((weak)) void* lil_malloc(size_t s);
 __attribute__((weak)) void free(void* p);
 __attribute__((weak)) void* lil_map(size_t loc, size_t len);
 __attribute__((weak, noreturn)) void* lil_panic(const char* msg);
+__attribute__((weak, noreturn)) void* lil_valloc(size_t vram_size);
+__attribute__((weak, noreturn)) void* lil_vfree(size_t vram_size, void* addr);
