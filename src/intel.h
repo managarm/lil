@@ -2,8 +2,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
-typedef uint64_t GpuAddr;
+typedef uint32_t GpuAddr;
 struct LilGpu;
 
 typedef enum LilConnectorType {
@@ -36,6 +37,10 @@ typedef enum LilPlaneType {
 typedef struct LilPlane {
     LilPlaneType type;
     GpuAddr surface_address;
+    bool enabled;
+    uint32_t pipe_id;
+
+    void (*update_surface) (struct LilGpu* gpu, struct LilPlane* plane, GpuAddr surface_address);
 } LilPlane;
 
 struct LilConnector;
@@ -49,6 +54,7 @@ typedef struct LilCrtc {
     uint32_t num_planes;
     LilPlane* planes;
 
+    void (*shutdown) (struct LilGpu* gpu, struct LilCrtc* crtc);
     void (*commit_modeset) (struct LilGpu* gpu, struct LilCrtc* crtc);
 } LilCrtc;
 
@@ -105,6 +111,8 @@ typedef struct LilGpu {
     uintptr_t gpio_start;
     uintptr_t mmio_start;
     uintptr_t vram;
+    uintptr_t gtt_address;
+    size_t gtt_size;
 
     void (*enable_display_interrupt) (struct LilGpu* gpu, uint32_t enable_mask);
     void (*process_interrupt) (struct LilGpu* gpu);

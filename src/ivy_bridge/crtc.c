@@ -10,6 +10,8 @@
 #define  BLC_PWM_CPU_CTL 0x48254
 #define  CUR_CTL_BASE 0x70080
 #define  PRI_CTL_BASE 0x70180
+#define  PRI_LINOFF_BASE 0x70184
+#define  PRI_SURF_BASE 0x7019C
 #define  plane_ctl_off 0x1000
 #define  PIPE_CONF_BASE 0x70008
 #define  VGA_CONTROL 0x41000
@@ -241,14 +243,7 @@ static void wait_mask (volatile uint32_t* reg, bool set, uint32_t mask) {
     }
 }
 
-//TODO check what "panel requirements" are
-void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
-    lil_sleep(10);
-    PllParams params;
-    if (!find_params(&crtc->connector->limits, &crtc->current_mode, &params)) {
-        //todo errors
-    }
-
+void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     //disable the backlight
     volatile uint32_t* cpu_backlight_ctl = (uint32_t*)(gpu->mmio_start + BLC_PWM_CPU_CTL);
     *cpu_backlight_ctl = 0;
@@ -336,9 +331,20 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         (void)*fdi_rx_ctl;
         lil_sleep(100);
     }
-    //the disable sequence is now complete
+}
+
+//TODO check what "panel requirements" are
+void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
+    lil_sleep(10);
+    PllParams params;
+    if (!find_params(&crtc->connector->limits, &crtc->current_mode, &params)) {
+        //todo errors
+    }
+
     //1: Enable panel power as needed to retrieve panel configuration
     //a: Enable panel power override using AUX VDD enable override bit
+    volatile uint32_t* pp_control = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
+    volatile uint32_t* pp_status = (uint32_t*)(gpu->mmio_start + PP_STATUS);
     set_mask(pp_control, 1, (1 << 3));
     //b: Wait for delay given in panel requirements
     lil_sleep(100);
@@ -378,6 +384,14 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     ////(already enabled in theory)
     //4: If enabling port on PCH:
     //a: Enable PCH FDI Receiver PLL, wait for warmup plus DMI latency
+    volatile uint32_t* fdi_rx_ctl = (uint32_t*)(gpu->mmio_start + FDI_RX_CTL_BASE + 0x1000 * crtc->pipe_id);
+    volatile uint32_t* fdi_tx_ctl = (uint32_t*)(gpu->mmio_start + FDI_TX_CTL_BASE + 0x1000 * crtc->pipe_id);
+    volatile uint32_t* pch_trans_conf = (uint32_t*)(gpu->mmio_start + TRANS_CONF_BASE + 0x1000 * crtc->pipe_id);
+    //register used for different kinds of workarounds, the singular bits are unknown
+    volatile uint32_t* pch_trans_workaround = (uint32_t*)(gpu->mmio_start + TRANS_WORKAROUND_REG_BASE + 0x1000 * crtc->pipe_id);
+    volatile uint32_t* dpll_sel = (uint32_t*)(gpu->mmio_start + DPLL_SEL);
+    volatile uint32_t* dpll_a_ctl = (uint32_t*)(gpu->mmio_start + DPLLA_CTL);
+    volatile uint32_t* dpll_b_ctl = (uint32_t*)(gpu->mmio_start + DPLLB_CTL);
     uint32_t val = *fdi_rx_ctl;
     val &= ~(7 << 19) | (0x7 << 16);
     *fdi_rx_ctl = val | FDI_RX_PLL_ENABLE;
@@ -392,10 +406,19 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     (void)*fdi_tx_ctl;
     lil_sleep(10);
     //7: Enable CPU pipe
+    volatile uint32_t* pipe_config = (uint32_t*)(gpu->mmio_start + PIPE_CONF_BASE + crtc->pipe_id * 0x1000);
     set_mask(pipe_config, 1, PIPE_ENABLE);
     (void)*pipe_config;
     //8: Configure and enable CPU planes TODO do this based on planes
-    set_mask(primary_plane_control, 1, PLANE_ENABLE);
+    volatile uint32_t* pri_surf = (uint32_t*)(gpu->mmio_start + PRI_SURF_BASE + 0x1000 * crtc->pipe_id);
+    volatile uint32_t* pri_linoff = (uint32_t*)(gpu->mmio_start + PRI_LINOFF_BASE + 0x1000 * crtc->pipe_id);
+
+    if (crtc->planes[0].enabled) {
+        volatile uint32_t* primary_plane_control = (uint32_t*)(gpu->mmio_start + PRI_CTL_BASE + crtc->pipe_id * 0x1000);
+        set_mask(primary_plane_control, 1, PLANE_ENABLE);
+        *pri_surf  = crtc->planes[0].surface_address & ~0xfff;
+        *pri_linoff  = crtc->planes[0].surface_address & 0xfff;
+    }
     
     volatile uint32_t* fdi_rx_tu_size = (uint32_t*)(gpu->mmio_start + FDI_RX_TU_SIZE_BASE + 0x1000 * crtc->pipe_id);
     volatile uint32_t* fdi_rx_imr = (uint32_t*)(gpu->mmio_start + FDI_RX_IMR_BASE + 0x1000 * crtc->pipe_id);
@@ -559,5 +582,6 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     wait_mask(pp_status, 1, PP_STATUS_ON);
     //15: Enable panel backlight
     //set_mask(backlight_pwm_data, 1, 0xffff);
+    volatile uint32_t* cpu_backlight_ctl = (uint32_t*)(gpu->mmio_start + BLC_PWM_CPU_CTL);
     *cpu_backlight_ctl = 0xffff;
 }

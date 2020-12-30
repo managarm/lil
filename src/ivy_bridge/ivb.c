@@ -6,6 +6,7 @@
 #include "../gmbus.h"
 #include "crtc.h"
 #include "interrupt.h"
+#include "plane.h"
 
 PllLilLimits ivb_limits_single_lvds = {
     .dot = { .min = 25000, .max = 350000 },
@@ -28,6 +29,8 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->mmio_start = (uintptr_t)lil_map(base, len);
     lil_get_bar(device, 2, &base, &len);
     ret->vram = (uintptr_t)lil_map(base, len);
+    ret->gtt_address = ret->mmio_start + (2 * 1024 * 1024);
+    ret->gtt_size = 2 * 1024 * 1024;
    
     //TODO currently we only support LVDS
 
@@ -44,8 +47,13 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->connectors[0].crtc->connector = &ret->connectors[0];
     ret->connectors[0].crtc->num_planes = 1;
     ret->connectors[0].crtc->planes = lil_malloc(sizeof(LilPlane));
+    for (int i = 0; i < ret->connectors[0].crtc->num_planes; i++) {
+        ret->connectors[0].crtc->planes[i].enabled = 0;
+        ret->connectors[0].crtc->planes[i].pipe_id = 0;
+    }
     ret->connectors[0].crtc->pipe_id = 0;
     ret->connectors[0].crtc->commit_modeset = lil_ivb_commit_modeset;
+    ret->connectors[0].crtc->shutdown = lil_ivb_shutdown;
     ret->enable_display_interrupt = lil_ivb_enable_display_interrupt;
     ret->process_interrupt = lil_ivb_process_display_interrupt;
 }
