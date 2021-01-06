@@ -44,6 +44,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->connectors[0].set_state = lil_ivb_lvds_set_state;
     ret->connectors[0].limits = ivb_limits_single_lvds;
     ret->connectors[0].on_pch = true;
+    ret->connectors[0].crtc = lil_malloc(sizeof(LilCrtc));
     ret->connectors[0].crtc->connector = &ret->connectors[0];
     ret->connectors[0].crtc->num_planes = 1;
     ret->connectors[0].crtc->planes = lil_malloc(sizeof(LilPlane));
