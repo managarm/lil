@@ -8,6 +8,17 @@
 #include "interrupt.h"
 #include "plane.h"
 
+#define PCI_MGGC0 0x50
+
+static uint32_t get_gtt_size(void* device) {
+    uint16_t mggc0 = lil_pci_readw(device, PCI_MGGC0);
+    uint8_t size = ((mggc0 >> 8) & 0b11);
+    if(size == 3)
+        lil_panic("Reserved GTT Size");
+
+    return size * 1024 * 1024;
+}
+
 PllLilLimits ivb_limits_single_lvds = {
     .dot = { .min = 25000, .max = 350000 },
     .vco = { .min = 1760000, .max = 3510000 },
@@ -21,7 +32,6 @@ PllLilLimits ivb_limits_single_lvds = {
 };
 
 void lil_init_ivb_gpu(LilGpu* ret, void* device) {
-
     ret->gpio_start = 0xC0000;
     uintptr_t base;
     uintptr_t len;
@@ -30,7 +40,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     lil_get_bar(device, 2, &base, &len);
     ret->vram = (uintptr_t)lil_map(base, len);
     ret->gtt_address = ret->mmio_start + (2 * 1024 * 1024);
-    ret->gtt_size = 2 * 1024 * 1024;
+    ret->gtt_size = get_gtt_size(device);
    
     //TODO currently we only support LVDS
 
