@@ -17,6 +17,7 @@ void lil_init_gpu(LilGpu* ret, void* device) {
     switch (device_id) {
         case 0x0166 : {
             lil_init_ivb_gpu(ret, device);
+            break;
         }
     }
 }
