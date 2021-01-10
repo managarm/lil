@@ -40,7 +40,7 @@ typedef struct LilPlane {
     bool enabled;
     uint32_t pipe_id;
 
-    void (*update_surface) (struct LilGpu* gpu, struct LilPlane* plane, GpuAddr surface_address);
+    bool (*update_surface) (struct LilGpu* gpu, struct LilPlane* plane, GpuAddr surface_address, GpuAddr line_stride);
 } LilPlane;
 
 struct LilConnector;
