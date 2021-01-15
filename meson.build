@@ -2,11 +2,11 @@ project('lil', 'c')
 
 sources = files(
     'src/gmbus.c',
-    'src/gtt.c',
     'src/intel.c',
     'src/pci.c',
     
     'src/ivy_bridge/crtc.c',
+    'src/ivy_bridge/gtt.c',
     'src/ivy_bridge/interrupt.c',
     'src/ivy_bridge/ivb.c',
     'src/ivy_bridge/lvds.c',
