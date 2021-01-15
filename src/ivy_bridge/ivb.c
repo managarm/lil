@@ -7,6 +7,7 @@
 #include "crtc.h"
 #include "interrupt.h"
 #include "plane.h"
+#include "gtt.h"
 
 #define PCI_MGGC0 0x50
 
@@ -39,8 +40,11 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->mmio_start = (uintptr_t)lil_map(base, len);
     lil_get_bar(device, 2, &base, &len);
     ret->vram = (uintptr_t)lil_map(base, len);
+
     ret->gtt_address = ret->mmio_start + (2 * 1024 * 1024);
     ret->gtt_size = get_gtt_size(device);
+    ret->vmem_clear = lil_ivb_vmem_clear;
+    ret->vmem_map = lil_ivb_vmem_map;
    
     //TODO currently we only support LVDS
 

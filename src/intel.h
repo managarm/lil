@@ -116,6 +116,9 @@ typedef struct LilGpu {
 
     void (*enable_display_interrupt) (struct LilGpu* gpu, uint32_t enable_mask);
     void (*process_interrupt) (struct LilGpu* gpu);
+
+    void (*vmem_clear) (struct LilGpu* gpu);
+    void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
 } LilGpu;
 
 /*
