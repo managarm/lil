@@ -3,12 +3,12 @@
 
 #include <stddef.h>
 
-#define GMBUS_SELECT 0xC5100
-#define GMBUS_COMMAND_STATUS 0xC5104
-#define GMBUS_STATUS 0xC5108
-#define GMBUS_DATA 0xC510C
-#define GMBUS_IRMASK 0xC5110
-#define GMBUS_2BYTEINDEX 0xC5120
+#define GMBUS_SELECT 0x5100
+#define GMBUS_COMMAND_STATUS 0x5104
+#define GMBUS_STATUS 0x5108
+#define GMBUS_DATA 0x510C
+#define GMBUS_IRMASK 0x5110
+#define GMBUS_2BYTEINDEX 0x5120
 
 #define GMBUS_HW_RDY (1 << 11)
 #define GMBUS_NAK (1 << 10)
@@ -75,7 +75,7 @@ typedef struct DisplayData {
 } DisplayData;
 
 static void gmbus_wait_progress(LilGpu* gpu) {
-    volatile uint32_t* gmbus_status = (uint32_t*)(gpu->mmio_start + GMBUS_STATUS);
+    volatile uint32_t* gmbus_status = (uint32_t*)(gpu->mmio_start + GMBUS_STATUS + gpu->gpio_start);
     while(1) {
         uint32_t status = *gmbus_status;
         if(status & (GMBUS_NAK)) {
@@ -88,7 +88,7 @@ static void gmbus_wait_progress(LilGpu* gpu) {
 }
 
 static void gmbus_wait_completion(LilGpu* gpu) {
-    volatile uint32_t* gmbus_status = (uint32_t*)(gpu->mmio_start + GMBUS_STATUS);
+    volatile uint32_t* gmbus_status = (uint32_t*)(gpu->mmio_start + GMBUS_STATUS + gpu->gpio_start);
     while(1) {
         uint32_t status = *gmbus_status;
         if(status & (GMBUS_NAK)) {
@@ -101,9 +101,9 @@ static void gmbus_wait_completion(LilGpu* gpu) {
 }
 
 static void gmbus_read(LilGpu* gpu, int pin_pair, uint32_t offset, uint32_t len, uint8_t* buf) {
-    volatile uint32_t* gmbus_select = (uint32_t*)(gpu->mmio_start + GMBUS_SELECT);
-    volatile uint32_t* gmbus_command = (uint32_t*)(gpu->mmio_start + GMBUS_COMMAND_STATUS);
-    volatile uint32_t* gmbus_data = (uint32_t*)(gpu->mmio_start + GMBUS_DATA);
+    volatile uint32_t* gmbus_select = (uint32_t*)(gpu->mmio_start + GMBUS_SELECT + gpu->gpio_start);
+    volatile uint32_t* gmbus_command = (uint32_t*)(gpu->mmio_start + GMBUS_COMMAND_STATUS + gpu->gpio_start);
+    volatile uint32_t* gmbus_data = (uint32_t*)(gpu->mmio_start + GMBUS_DATA + gpu->gpio_start);
 
     uint32_t gmbus_select_val = *gmbus_select;
     uint32_t gmbus_command_val = *gmbus_command;
