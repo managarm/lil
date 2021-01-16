@@ -104,9 +104,16 @@ typedef enum LilInterruptEnableMask {
     VBLANK_C, VSYNC_C
 } LilInterruptEnableMask;
 
+typedef enum LilGpuGen {
+    GEN_IVB = 7,
+    GEN_CFL = 9,
+} LilGpuGen;
+
 typedef struct LilGpu {
     uint32_t num_connectors;
     LilConnector* connectors;
+
+    LilGpuGen gen;
 
     uintptr_t gpio_start;
     uintptr_t mmio_start;
