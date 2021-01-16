@@ -16,7 +16,8 @@ bool lil_ivb_update_primary_surface(struct LilGpu* gpu, struct LilPlane* plane, 
 
     *pri_surf   = surface_address  & ~0xfff;
     *pri_linoff = surface_address &  0xfff;
-    *pri_stride = line_stride;
+    //FIXME: this seems to behave weirdly depending on the machine, even with the same monitor resolutin
+    //*pri_stride = line_stride;
 
     return true;
 }
