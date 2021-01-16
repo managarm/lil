@@ -1,8 +1,10 @@
 project('lil', 'c')
 
 sources = files(
+    'src/edid.c',
     'src/gmbus.c',
     'src/intel.c',
+    'src/lvds.c',
     'src/pci.c',
     
     'src/ivy_bridge/crtc.c',

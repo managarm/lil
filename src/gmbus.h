@@ -4,4 +4,4 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void lil_get_mode_info(LilGpu* gpu, LilModeInfo* out, int pin_pair);
+uint8_t lil_gmbus_get_mode_info(LilGpu* gpu, LilModeInfo* out, int pin_pair);
