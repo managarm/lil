@@ -36,6 +36,14 @@
 #define DDI_AUX_I2C_READ 0x1
 #define DDI_AUX_I2C_MOT (1 << 2) // Middle of Transfer
 
+
+#define DP_TP_CTL(c) (0x64040 + ((c) * 0x100))
+#define DP_TP_STS(c) (0x64044 + ((c) * 0x100))
+
+#define DDI_BUF_CTL(c) (0x64000 + ((c) * 0x100))
+
+#define DDI_BUF_CTL_DISPLAY_DETECTED (1 << 0)
+
 typedef struct AuxRequest {
     uint8_t request;
     uint32_t address;
@@ -273,8 +281,8 @@ static void dp_aux_read_edid(struct LilGpu* gpu, DisplayData* buf) {
 }
 
 bool lil_cfl_dp_is_connected (struct LilGpu* gpu, struct LilConnector* connector) {
-    // TODO
-    return true;
+    volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + DDI_AUX_CTL(0));
+    return *ctl & DDI_BUF_CTL_DISPLAY_DETECTED; // TODO: This only works for DDI A, other DDIs are detected through `SFUSE_STRAP`
 }
 
 LilConnectorInfo lil_cfl_dp_get_connector_info (struct LilGpu* gpu, struct LilConnector* connector) {
