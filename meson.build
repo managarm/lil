@@ -15,6 +15,7 @@ sources = files(
 
     'src/coffee_lake/cfl.c',
     'src/coffee_lake/dp.c',
+    'src/coffee_lake/gtt.c',
 )
 
 library = static_library('lil', sources, pic: false)
