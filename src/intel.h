@@ -11,6 +11,7 @@ typedef enum LilConnectorType {
     HDMI,
     LVDS,
     DISPLAYPORT,
+    EDP
 } LilConnectorType;
 
 typedef struct LilModeInfo {
@@ -45,9 +46,20 @@ typedef struct LilPlane {
 
 struct LilConnector;
 
+typedef enum LilTranscoder {
+    TRANSCODER_A,
+    TRANSCODER_B,
+    TRANSCODER_C,
+    TRANSCODER_D,
+
+    TRANSCODER_EDP,
+} LilTranscoder;
+
 typedef struct LilCrtc {
     LilModeInfo current_mode;
     struct LilConnector* connector;
+
+    LilTranscoder transcoder;
 
     uint32_t pipe_id;
 

@@ -14,6 +14,7 @@ sources = files(
     'src/ivy_bridge/plane.c',
 
     'src/coffee_lake/cfl.c',
+    'src/coffee_lake/crtc.c',
     'src/coffee_lake/dp.c',
     'src/coffee_lake/gtt.c',
 )

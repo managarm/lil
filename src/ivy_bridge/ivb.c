@@ -56,6 +56,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->connectors = lil_malloc(sizeof(LilConnector) * ret->num_connectors);
 
     ret->connectors[0].id = 0;
+    ret->connectors[0].type = LVDS;
     ret->connectors[0].get_connector_info = lil_lvds_get_connector_info;
     ret->connectors[0].is_connected = lil_lvds_is_connected;
     ret->connectors[0].get_state = lil_lvds_get_state;

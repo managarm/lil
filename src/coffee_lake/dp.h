@@ -10,3 +10,6 @@ void lil_cfl_dp_set_state (struct LilGpu* gpu, struct LilConnector* connector, u
 uint32_t lil_cfl_dp_get_state (struct LilGpu* gpu, struct LilConnector* connector);
 
 void lil_cfl_dp_init(struct LilGpu* gpu, struct LilConnector* connector);
+
+void lil_cfl_dp_disable(struct LilGpu* gpu, struct LilConnector* connector);
+void lil_cfl_dp_post_disable(struct LilGpu* gpu, struct LilConnector* connector);
