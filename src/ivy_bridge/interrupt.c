@@ -7,7 +7,7 @@ void lil_ivb_enable_display_interrupt (LilGpu* gpu, uint32_t enable_mask) {
     volatile uint32_t* de_iir = (uint32_t*)(gpu->mmio_start + 0x44008);
     volatile uint32_t* de_ier = (uint32_t*)(gpu->mmio_start + 0x4400C);
     //global interrupt enable (this bit is only present in the IER register).
-    *de_ier |= (1 << 31);
+    *de_ier |= (1u << 31);
     if (enable_mask & VBLANK_A) {
         *de_iir |= 1;
         *de_imr &= ~(1);

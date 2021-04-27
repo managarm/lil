@@ -24,7 +24,7 @@
 #define GMBUS_OFFSET(x) ((x & GMBUS_OFFSET_MASK) << GMBUS_OFFSET_SHIFT)
 #define GMBUS_READ 1
 #define GMBUS_SW_READY (1 << 30)
-#define GMBUS_CLEAR_INTERRUPT (1 << 31)
+#define GMBUS_CLEAR_INTERRUPT (1u << 31)
 
 
 
