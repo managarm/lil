@@ -1,6 +1,6 @@
 #include "edid.h"
 
-void edid_timing_to_mode(DetailTiming timing, LilModeInfo* mode) {
+void edid_timing_to_mode(DisplayData* edid, DetailTiming timing, LilModeInfo* mode) {
     mode->clock = timing.pixelClock * 10;
 
     uint32_t horz_active = timing.horzActive | ((uint32_t)(timing.horzActiveBlankMsb >> 4) << 8);
@@ -20,4 +20,9 @@ void edid_timing_to_mode(DetailTiming timing, LilModeInfo* mode) {
     mode->vsyncStart = vert_active + vert_sync_offset;
     mode->vsyncEnd = vert_active + vert_sync_offset + vert_sync_pulse;
     mode->vtotal = vert_active + vert_blank;
+    
+    if(edid->structRevision < 4 || !(edid->inputParameters & (1 << 7)) || (((edid->inputParameters >> 4) & 0x7) == 0) || (((edid->inputParameters >> 4) & 0x7) == 7))
+        mode->bpc = 5;
+    else
+        mode->bpc = 4 + 2 * ((edid->inputParameters >> 4) & 0x7);
 }

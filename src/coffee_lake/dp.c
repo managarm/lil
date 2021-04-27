@@ -14,14 +14,14 @@
 #define PP_CONTROL_BACKLIGHT (1 << 2)
 #define PP_CONTROL_FORCE_VDD (1 << 3)
 
-#define PP_STATUS_ON_STATUS (1 << 31)
+#define PP_STATUS_ON_STATUS (1u << 31)
 #define PP_STATUS_GET_SEQUENCE_PROGRESS(v) (((v) >> 28) & 0x3)
 #define PP_STATUS_SEQUENCE_NONE 0
 
 #define DDI_AUX_CTL(c) (0x64010 + ((c) * 0x100))
 #define DDI_AUX_DATA(c) (0x64014 + ((c) * 0x100))
 
-#define DDI_AUX_CTL_BUSY (1 << 31)
+#define DDI_AUX_CTL_BUSY (1u << 31)
 #define DDI_AUX_CTL_DONE (1 << 30)
 #define DDI_AUX_CTL_IRQ (1 << 29)
 #define DDI_AUX_CTL_TIMEOUT (1 << 28)
@@ -41,9 +41,16 @@
 #define DDI_AUX_NATIVE_READ 0x9
 
 #define DPCD_REV 0x0
+#define DPCD_MAX_LINK_RATE 0x1
+#define DPCD_MAX_LANE_COUNT 0x2
+#define DPCD_MAX_DOWNSPREAD 0x3
+#define NO_AUX_HANDSHAKE_LINK_TRAINING (1 << 6)
+
 #define DPCD_DOWNSTREAMPORT_PRESENT 0x5
 #define DPCD_EDP_CONFIGURATION_CAP 0xD
 #define DPCD_DOWNSTREAM_PORT0_CAP 0x80
+
+#define DPCD_TRAIN_PATTERN 0x102
 
 #define DPCD_SET_POWER 0x600
 #define DPCD_POWER_D0 1
@@ -53,15 +60,20 @@
 #define DP_TP_CTL(c) (0x64040 + ((c) * 0x100))
 #define DP_TP_STS(c) (0x64044 + ((c) * 0x100))
 
-#define DP_TP_CTL_ENABLE (1 << 31)
+#define DP_TP_CTL_ENABLE (1u << 31)
 #define DP_TP_CTL_TRAIN_MASK (7 << 8)
 #define DP_TP_CTL_TRAIN_PATTERN1 (0 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN2 (1 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN_IDLE (2 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN_NORMAL (3 << 8);
 
 #define DDI_BUF_CTL(c) (0x64000 + ((c) * 0x100))
 
-#define DDI_BUF_CTL_ENABLE (1 << 31)
+#define DDI_BUF_CTL_ENABLE (1u << 31)
 #define DDI_BUF_CTL_IDLE (1 << 7)
 #define DDI_BUF_CTL_DISPLAY_DETECTED (1 << 0)
+
+#define DDI_BUF_CTL_DP_PORT_WIDTH(v) (((v) >> 1) & 0x7)
 
 #define BLC_PWM_CPU_CTL2 0x48250
 #define BLC_PWM_CPU_CTL 0x48254
@@ -70,8 +82,46 @@
 
 #define TRANS_CLK_SEL(pipe) (0x46140 + ((pipe) * 4))
 
+#define DPLL_CTRL1 0x6C058
+#define DPLL_CTRL1_LINK_RATE_MASK(i) (7 << ((i) * 6 + 1))
+#define DPLL_CTRL1_LINK_RATE(i, v) ((v) << ((i) * 6 + 1))
+#define DPLL_CTRL1_PROGRAM_ENABLE(i) (1 << ((i) * 6))
+#define DPLL_CTRL1_SSC_ENABLE(i) (1 << ((i) * 6 + 4))
+#define DPLL_CTRL1_HDMI_MODE(i) (1 << ((i) * 6 + 5))
+
 #define DPLL_CTRL2 0x6C05C
 #define DPLL_CTRL2_DDI_CLK_OFF(port) (1 << ((port) + 15))
+#define DPLL_CTRL2_DDI_CLK_SEL_MASK(port) (3 << ((port) * 3 + 1))
+#define DPLL_CTRL2_DDI_CLK_SEL(clk, port) ((clk) << ((port) * 3 + 1))
+#define DPLL_CTRL2_DDI_SEL_OVERRIDE(port) (1 << ((port) << 3))
+
+#define DPLL_STATUS 0x6C060
+#define DPLL_STATUS_LOCK(i) (1 << ((i) * 8))
+
+#define LCPLL1_CTL 0x46010
+#define LCPLL1_ENABLE (1u << 31)
+#define LCPLL1_LOCK (1 << 30)
+
+#define LCPLL2_CTL 0x46014
+#define LCPLL2_ENABLE (1u << 31)
+
+#define MG_DP_MODE(ln, port) (0x1683A0 + ((ln) * 0x400) + ((port) * 0x1000))
+
+#define MG_DP_X1 (1 << 6)
+#define MG_DP_X2 (1 << 7)
+
+static inline uint64_t get_fia_base(uint32_t fia) {
+    switch (fia) {
+        case 1: return 0x163000;
+        case 2: return 0x16E000;
+        case 3: return 0x16F000;
+        default: lil_panic("Unknown FIA");
+    }
+}
+
+#define PORT_TX_DFLEXPA(fia) (get_fia_base(fia) + 0x880)
+#define DP_PIN_ASSIGN_SHIFT(i) ((i) * 4)
+#define DP_PIN_ASSIGN_MASK(i) (0xF << ((i) * 4))
 
 typedef struct AuxRequest {
     uint8_t request;
@@ -305,7 +355,7 @@ uint8_t dp_aux_native_read(struct LilGpu* gpu, uint16_t addr) {
 
 static void dp_aux_native_write(struct LilGpu* gpu, uint16_t addr, uint8_t v) {
     AuxRequest req = {0};
-    req.request = DDI_AUX_I2C_WRITE;
+    req.request = DDI_AUX_NATIVE_WRITE;
     req.address = addr;
     req.size = 1;
     req.tx[0] = v;
@@ -346,7 +396,7 @@ LilConnectorInfo lil_cfl_dp_get_connector_info (struct LilGpu* gpu, struct LilCo
         if(edid.detailTimings[i].pixelClock == 0)
             continue; // Not a timing descriptor
 
-        edid_timing_to_mode(edid.detailTimings[i], &info[j++]);
+        edid_timing_to_mode(&edid, edid.detailTimings[i], &info[j++]);
     }
 
     ret.modes = info;
@@ -369,8 +419,8 @@ static uint32_t get_pp_control(struct LilGpu* gpu) {
 
     // Completely undocumented? Linux does it under the guise of "Unlocking registers??"
     if((v >> 16) != 0xABCD) {
-        v &= ~(0xFFFF << 16);
-        v |= (0xABCD << 16);
+        v &= ~(0xFFFFu << 16);
+        v |= (0xABCDu << 16);
     }
 
     return v;
@@ -384,7 +434,7 @@ static void edp_panel_on(struct LilGpu* gpu, struct LilConnector* connector) {
     volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
     
     uint32_t v = get_pp_control(gpu);
-    v |= PP_CONTROL_ON | PP_CONTROL_RESET | PP_CONTROL_FORCE_VDD;
+    v |= PP_CONTROL_ON | PP_CONTROL_BACKLIGHT | PP_CONTROL_RESET;
 
     *ctl = v;
     (void)*ctl;
@@ -442,15 +492,15 @@ static void edp_panel_backlight_off(struct LilGpu* gpu, struct LilConnector* con
     *ctl = v;
     (void)*ctl;
 
-    volatile uint32_t* blc_ctl2 = (uint32_t*)(gpu->mmio_start + BLC_PWM_CPU_CTL2);
+    /*volatile uint32_t* blc_ctl2 = (uint32_t*)(gpu->mmio_start + BLC_PWM_CPU_CTL2);
     volatile uint32_t* blc_ctl = (uint32_t*)(gpu->mmio_start + BLC_PWM_CPU_CTL);
 
-    *blc_ctl2 &= ~(1 << 31);
-    *blc_ctl &= ~(1 << 31);
+    *blc_ctl2 &= ~(1u << 31);
+    *blc_ctl &= ~(1u << 31);
 
     v = *blc_ctl;
     v &= ~0xFFFF; // Duty Cycle 0
-    *blc_ctl = v;
+    *blc_ctl = v;*/
 }
 
 static void dp_set_sink_power(struct LilGpu* gpu, struct LilConnector* connector, bool on) {
@@ -475,7 +525,9 @@ static void dp_set_sink_power(struct LilGpu* gpu, struct LilConnector* connector
 
 void lil_cfl_dp_init(struct LilGpu* gpu, struct LilConnector* connector) {
     // From Skylake PRMs Vol Display, AUX Programming sequence
-    volatile uint32_t* pwr = (uint32_t*)(gpu->mmio_start + PWR_WELL_CTL2);
+
+    // Does not seem to be needed?
+    /*volatile uint32_t* pwr = (uint32_t*)(gpu->mmio_start + PWR_WELL_CTL2);
     volatile uint32_t* cstate = (uint32_t*)(gpu->mmio_start + DC_STATE_EN);
 
     *pwr |= (1 << 29); // Request Power Well 1 start
@@ -493,7 +545,7 @@ void lil_cfl_dp_init(struct LilGpu* gpu, struct LilConnector* connector) {
     while(((*pwr >> 0) & 1) == 0)
         ;
 
-    *cstate &= ~0x3; // Disable DC5 and DC6 state
+    *cstate &= ~0x3; // Disable DC5 and DC6 state*/
 
     uint8_t cap = dp_aux_native_read(gpu, DPCD_EDP_CONFIGURATION_CAP);
     connector->type = (cap != 0) ? EDP : DISPLAYPORT; // Hacky, but it should work on any eDP display that is semi-modern, better option is to parse VBIOS
@@ -512,7 +564,7 @@ void lil_cfl_dp_post_disable(struct LilGpu* gpu, struct LilConnector* connector)
     *video_dip_ctl = v;
     (void)*video_dip_ctl;
 
-    dp_set_sink_power(gpu, connector, false);
+    //dp_set_sink_power(gpu, connector, false);
 
     if(connector->crtc->transcoder != TRANSCODER_EDP) {
         volatile uint32_t* trans_clk_sel = (uint32_t*)(gpu->mmio_start + TRANS_CLK_SEL(connector->crtc->pipe_id));
@@ -538,11 +590,210 @@ void lil_cfl_dp_post_disable(struct LilGpu* gpu, struct LilConnector* connector)
     if(wait)
         lil_sleep(1); // 518us - 1000us, just give it some time
 
+    //edp_panel_off(gpu, connector);
     edp_panel_vdd_on(gpu, connector);
-    edp_panel_off(gpu, connector);
 
     volatile uint32_t* dpll_ctl2 = (uint32_t*)(gpu->mmio_start + DPLL_CTRL2);
     v = *dpll_ctl2;
     v |= DPLL_CTRL2_DDI_CLK_OFF(connector->crtc->pipe_id);
     *dpll_ctl2 = v;
+}
+
+static uint32_t dpcd_speed_to_dpll(uint8_t dpll, uint8_t rate) {
+    if(rate == 0x14) return DPLL_CTRL1_LINK_RATE(dpll, 0);
+    else if(rate == 0xA) return DPLL_CTRL1_LINK_RATE(dpll, 1);
+    else if(rate == 0x6) return DPLL_CTRL1_LINK_RATE(dpll, 2);
+    else lil_panic("Unknown DCPD Speed");
+}
+
+void lil_cfl_dp_pre_enable(struct LilGpu* gpu, struct LilConnector* connector) {
+    /*edp_panel_on(gpu, connector);
+
+    
+
+    volatile uint32_t* mg_dp_ln0 = (uint32_t*)(gpu->mmio_start + MG_DP_MODE(0, connector->crtc->pipe_id));
+    volatile uint32_t* mg_dp_ln1 = (uint32_t*)(gpu->mmio_start + MG_DP_MODE(1, connector->crtc->pipe_id));
+    uint32_t ln0 = *mg_dp_ln0;
+    uint32_t ln1 = *mg_dp_ln1;
+
+    volatile uint32_t* pin_assign = (uint32_t)(gpu->mmio_start + PORT_TX_DFLEXPA(1)); // TODO: What is a FIA
+    uint32_t pin_mask = (*pin_assign & DP_PIN_ASSIGN_MASK(1)) >> DP_PIN_ASSIGN_SHIFT(1);
+
+    volatile uint32_t* ddi_buf_ctl = (uint32_t*)(gpu->mmio_start + DDI_BUF_CTL(connector->crtc->pipe_id));
+    uint8_t width = DDI_BUF_CTL_DP_PORT_WIDTH(*ddi_buf_ctl) + 1;
+
+    switch (pin_mask) {
+        case 0:
+            if(width == 1) {
+                ln1 |= MG_DP_X1;
+            } else {
+                ln0 |= MG_DP_X2;
+                ln1 |= MG_DP_X2;
+            }
+            break;
+        case 1:
+            if(width == 4) {
+                ln0 |= MG_DP_X2;
+                ln1 |= MG_DP_X2;
+            }
+            break;
+        case 2:
+            if(width == 2) {
+                ln0 |= MG_DP_X2;
+                ln1 |= MG_DP_X2;
+            }
+            break;
+        case 3:
+        case 5:
+            if(width == 1) {
+                ln0 |= MG_DP_X1;
+                ln1 |= MG_DP_X1;
+            } else {
+                ln0 |= MG_DP_X2;
+                ln1 |= MG_DP_X2;
+            }
+            break;
+        case 4:
+        case 6:
+            if(width == 1) {
+                ln0 |= MG_DP_X1;
+                ln1 |= MG_DP_X1;
+            } else {
+                ln0 |= MG_DP_X2;
+                ln1 |= MG_DP_X2;
+            }
+            break;
+    }
+
+    *mg_dp_ln0 = ln0;
+    *mg_dp_ln1 = ln1;*/
+
+   
+   edp_panel_on(gpu, connector);
+
+    uint32_t dpll_sel[] = {1, 3, 2};
+    uint32_t dpll = dpll_sel[connector->crtc->pipe_id];
+    if(connector->type == EDP)
+        dpll = 0;
+
+    volatile uint32_t* dpll_ctrl1 = (uint32_t*)(gpu->mmio_start + DPLL_CTRL1);
+    uint32_t v = *dpll_ctrl1;
+    v |= DPLL_CTRL1_PROGRAM_ENABLE(dpll);
+    v &= ~DPLL_CTRL1_HDMI_MODE(dpll); // DP mode
+    v &= ~DPLL_CTRL1_LINK_RATE_MASK(dpll);
+    v |= DPLL_CTRL1_LINK_RATE(dpll, dp_aux_native_read(gpu, DPCD_MAX_LINK_RATE));
+    *dpll_ctrl1 = v;
+    (void)*dpll_ctrl1;
+
+    volatile uint32_t* dpll_status = (uint32_t*)(gpu->mmio_start + DPLL_STATUS);
+    if(dpll == 0) {
+        volatile uint32_t* lcpll_ctl = (uint32_t*)(gpu->mmio_start + LCPLL1_CTL);
+        *lcpll_ctl |= LCPLL1_ENABLE;
+
+        while((*lcpll_ctl & LCPLL1_LOCK) == 0)
+            ;
+    } else if(dpll == 1) {
+        volatile uint32_t* lcpll_ctl = (uint32_t*)(gpu->mmio_start + LCPLL2_CTL);
+        *lcpll_ctl |= LCPLL2_ENABLE;
+
+        while((*dpll_status & DPLL_STATUS_LOCK(dpll)) == 0)
+            ;
+    } else {
+        lil_panic("TODO");
+    }
+
+    volatile uint32_t* dpll_ctl2 = (uint32_t*)(gpu->mmio_start + DPLL_CTRL2);
+    v = *dpll_ctl2;
+    v &= ~(DPLL_CTRL2_DDI_CLK_OFF(connector->crtc->pipe_id) | DPLL_CTRL2_DDI_CLK_SEL_MASK(connector->crtc->pipe_id));
+    v |= (DPLL_CTRL2_DDI_CLK_SEL(dpll, connector->crtc->pipe_id) | DPLL_CTRL2_DDI_SEL_OVERRIDE(connector->crtc->pipe_id)); // TODO: What is a DPLL ID?
+    *dpll_ctl2 = v;
+
+    volatile uint32_t* dp_tp_ctl = (uint32_t*)(gpu->mmio_start + DP_TP_CTL(connector->crtc->pipe_id));
+    v = *dp_tp_ctl;
+    v &= ~DP_TP_CTL_TRAIN_MASK;
+    v |= (DP_TP_CTL_ENABLE | DP_TP_CTL_TRAIN_PATTERN1);
+    *dp_tp_ctl = v;
+
+    volatile uint32_t* ddi_buf_ctl = (uint32_t*)(gpu->mmio_start + DDI_BUF_CTL(connector->crtc->pipe_id));
+    *ddi_buf_ctl |= DDI_BUF_CTL_ENABLE;
+
+    lil_sleep(5);
+
+    if(dp_aux_native_read(gpu, DPCD_REV) == 0x11 && dp_aux_native_read(gpu, DPCD_MAX_DOWNSPREAD) & NO_AUX_HANDSHAKE_LINK_TRAINING) {
+        lil_sleep(2);
+        v = *dp_tp_ctl;
+        v &= ~DP_TP_CTL_TRAIN_MASK;
+        v |= DP_TP_CTL_TRAIN_PATTERN2;
+        *dp_tp_ctl = v;
+
+        lil_sleep(2);
+        v = *dp_tp_ctl;
+        v &= ~DP_TP_CTL_TRAIN_MASK;
+        v |= DP_TP_CTL_TRAIN_PATTERN_IDLE;
+        *dp_tp_ctl = v;
+
+        lil_sleep(2);
+        v = *dp_tp_ctl;
+        v &= ~DP_TP_CTL_TRAIN_MASK;
+        v |= DP_TP_CTL_TRAIN_PATTERN_NORMAL;
+        *dp_tp_ctl = v;
+    } else {
+        lil_panic("TODO: Full DP link training");
+    }
+}
+
+#define DATA_N_MAX 0x800000
+#define LINK_N_MAX 0x100000
+#define M_N_MAX ((1 << 24) - 1)
+
+static uint64_t round_n(uint64_t n, uint64_t n_max) {
+    uint64_t rn = 0, rn2 = n_max;
+    while(rn2 >= n) {
+        rn = rn2;
+        rn2 /= 2;
+    }
+
+    return rn;
+}
+
+static void cancel_m_n(uint64_t* m, uint64_t* n, uint64_t n_max) {
+    const uint64_t orig_n = *n;
+
+    *n = round_n(*n, n_max);
+    *m = (*m * *n) / orig_n;
+
+    while(*m > M_N_MAX) {
+        *m /= 2;
+        *n /= 2;
+    }
+}
+
+LilDpMnValues lil_cfl_dp_calculate_mn(LilGpu* gpu, LilModeInfo* mode) {
+    LilDpMnValues ret = {0};
+
+    uint64_t m = 3 * mode->bpc * mode->clock * 1000;
+
+    uint8_t link_rate = dp_aux_native_read(gpu, DPCD_MAX_LINK_RATE);
+    uint64_t symbol_rate = 0;
+    if(link_rate == 0x6)
+        symbol_rate = 162000000;
+    else if(link_rate == 0xA)
+        symbol_rate = 270000000;
+    else if(link_rate == 0x14)
+        symbol_rate = 540000000;
+    else
+        lil_panic("Unknown DP Link Speed");
+
+    uint64_t n = 8 * symbol_rate * (dp_aux_native_read(gpu, DPCD_MAX_LANE_COUNT) & 0xF);
+    cancel_m_n(&m, &n, DATA_N_MAX);
+    ret.data_m = m;
+    ret.data_n = n;
+
+    m = mode->clock * 1000;
+    n = symbol_rate;
+    cancel_m_n(&m, &n, LINK_N_MAX);
+    ret.link_m = m;
+    ret.link_n = n;
+
+    return ret;
 }

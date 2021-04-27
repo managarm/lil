@@ -98,7 +98,7 @@ uint8_t lil_gmbus_get_mode_info(LilGpu* gpu, LilModeInfo* out, int pin_pair) {
         if(edid.detailTimings[i].pixelClock == 0)
             continue; // Not a timing descriptor
         
-        edid_timing_to_mode(edid.detailTimings[i], &out[j++]);
+        edid_timing_to_mode(&edid, edid.detailTimings[i], &out[j++]);
     }
 
     return j;

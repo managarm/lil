@@ -24,6 +24,7 @@ typedef struct LilModeInfo {
 	int hsyncStart;
 	int hsyncEnd;
 	int htotal;
+    int bpc;
 } LilModeInfo;
 
 /*

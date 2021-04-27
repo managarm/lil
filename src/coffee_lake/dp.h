@@ -13,3 +13,13 @@ void lil_cfl_dp_init(struct LilGpu* gpu, struct LilConnector* connector);
 
 void lil_cfl_dp_disable(struct LilGpu* gpu, struct LilConnector* connector);
 void lil_cfl_dp_post_disable(struct LilGpu* gpu, struct LilConnector* connector);
+
+void lil_cfl_dp_pre_enable(struct LilGpu* gpu, struct LilConnector* connector);
+
+typedef struct {
+    uint64_t link_m, link_n;
+    uint64_t data_m, data_n;
+} LilDpMnValues;
+LilDpMnValues lil_cfl_dp_calculate_mn(LilGpu* gpu, LilModeInfo* mode);
+
+uint8_t dp_aux_native_read(struct LilGpu* gpu, uint16_t addr);

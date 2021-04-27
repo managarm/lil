@@ -51,4 +51,4 @@ typedef struct DisplayData {
     uint8_t checksum;
 } DisplayData;
 
-void edid_timing_to_mode(DetailTiming timing, LilModeInfo* mode);
+void edid_timing_to_mode(DisplayData* edid, DetailTiming timing, LilModeInfo* mode);

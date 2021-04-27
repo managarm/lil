@@ -17,6 +17,7 @@ sources = files(
     'src/coffee_lake/crtc.c',
     'src/coffee_lake/dp.c',
     'src/coffee_lake/gtt.c',
+    'src/coffee_lake/plane.c',
 )
 
 library = static_library('lil', sources, pic: false)

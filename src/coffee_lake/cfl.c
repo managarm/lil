@@ -6,6 +6,7 @@
 #include "crtc.h"
 #include "dp.h"
 #include "gtt.h"
+#include "plane.h"
 
 #define PCI_MGGC0 0x50
 
@@ -48,13 +49,14 @@ void lil_init_cfl_gpu(LilGpu* ret, void* device) {
     lil_cfl_dp_init(ret, &ret->connectors[0]);
 
     ret->connectors[0].crtc = lil_malloc(sizeof(LilCrtc));
+    ret->connectors[0].crtc->transcoder = TRANSCODER_EDP;
     ret->connectors[0].crtc->connector = &ret->connectors[0];
     ret->connectors[0].crtc->num_planes = 1;
     ret->connectors[0].crtc->planes = lil_malloc(sizeof(LilPlane));
     for (int i = 0; i < ret->connectors[0].crtc->num_planes; i++) {
         ret->connectors[0].crtc->planes[i].enabled = 0;
         ret->connectors[0].crtc->planes[i].pipe_id = 0;
-        ret->connectors[0].crtc->planes[i].update_surface = NULL; // TODO
+        ret->connectors[0].crtc->planes[i].update_surface = lil_cfl_update_primary_surface;
     }
     ret->connectors[0].crtc->pipe_id = 0;
     ret->connectors[0].crtc->commit_modeset = lil_cfl_commit_modeset;
