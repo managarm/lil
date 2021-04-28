@@ -6,7 +6,7 @@
 void lil_get_bar(void* device, int bar, uintptr_t* obase, uintptr_t* len) {
     size_t reg_index = 0x10 + bar * 4;
     uint64_t bar_low = lil_pci_readd(device, reg_index), bar_size_low;
-    uint64_t bar_high = 0, bar_size_high = 0;
+    uint64_t bar_high = 0, bar_size_high = ~0;
 
     uintptr_t base;
     size_t size;

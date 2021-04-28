@@ -11,6 +11,7 @@ typedef enum LilConnectorType {
     HDMI,
     LVDS,
     DISPLAYPORT,
+    EDP
 } LilConnectorType;
 
 typedef struct LilModeInfo {
@@ -23,6 +24,7 @@ typedef struct LilModeInfo {
 	int hsyncStart;
 	int hsyncEnd;
 	int htotal;
+    int bpc;
 } LilModeInfo;
 
 /*
@@ -45,9 +47,20 @@ typedef struct LilPlane {
 
 struct LilConnector;
 
+typedef enum LilTranscoder {
+    TRANSCODER_A,
+    TRANSCODER_B,
+    TRANSCODER_C,
+    TRANSCODER_D,
+
+    TRANSCODER_EDP,
+} LilTranscoder;
+
 typedef struct LilCrtc {
     LilModeInfo current_mode;
     struct LilConnector* connector;
+
+    LilTranscoder transcoder;
 
     uint32_t pipe_id;
 
@@ -104,9 +117,16 @@ typedef enum LilInterruptEnableMask {
     VBLANK_C, VSYNC_C
 } LilInterruptEnableMask;
 
+typedef enum LilGpuGen {
+    GEN_IVB = 7,
+    GEN_CFL = 9,
+} LilGpuGen;
+
 typedef struct LilGpu {
     uint32_t num_connectors;
     LilConnector* connectors;
+
+    LilGpuGen gen;
 
     uintptr_t gpio_start;
     uintptr_t mmio_start;

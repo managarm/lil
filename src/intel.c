@@ -1,6 +1,7 @@
 #include "intel.h"
 #include "imports.h"
 #include "ivy_bridge/ivb.h"
+#include "coffee_lake/cfl.h"
 
 void lil_init_gpu(LilGpu* ret, void* device) {
    uint32_t config_0 = lil_pci_readd(device, 0);
@@ -16,7 +17,15 @@ void lil_init_gpu(LilGpu* ret, void* device) {
 
     switch (device_id) {
         case 0x0166 : {
+            ret->gen = GEN_IVB;
             lil_init_ivb_gpu(ret, device);
+            break;
+        }
+
+        case 0x3E9B:
+        case 0x5917: {
+            ret->gen = GEN_CFL;
+            lil_init_cfl_gpu(ret, device);
             break;
         }
     }

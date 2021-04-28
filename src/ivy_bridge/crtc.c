@@ -4,9 +4,9 @@
 #include <stdbool.h>
 
 #define  BLC_PWM_CTL 0x48250
-#define  BLM_PWM_ENABLE (1 << 31)
+#define  BLM_PWM_ENABLE (1u << 31)
 #define  SBLC_BLM_CTL1 0xC8250
-#define  BLM_PCH_PWM_ENABLE (1 << 31)
+#define  BLM_PCH_PWM_ENABLE (1u << 31)
 #define  BLC_PWM_CPU_CTL 0x48254
 #define  CUR_CTL_BASE 0x70080
 #define  PRI_CTL_BASE 0x70180
@@ -34,14 +34,14 @@
 #define  PP_ON 1 << 0
 #define  PP_STATUS_ON 1 << 31
 #define  LVDS_CTL 0xE1180
-#define  LVDS_PORT_EN (1 << 31)
+#define  LVDS_PORT_EN (1u << 31)
 #define  TRANS_CONF_BASE 0xF0008
 #define  trans_reg_off 0x1000
-#define  TRANS_ENABLE (1 << 31)
+#define  TRANS_ENABLE (1u << 31)
 #define  TRANS_STATE_ENABLE (1 << 30)
 #define  TRANS_WORKAROUND_REG_BASE 0xf0064
 #define  trans_workwaround_off 0x1000
-#define  TRANS_WORKAROUND_TIMING_OVERRIDE (1 << 31)
+#define  TRANS_WORKAROUND_TIMING_OVERRIDE (1u << 31)
 #define  DPLL_SEL 0xC7000
 #define  FDI_PCDCLK (1 << 4)
 #define  FDI_TX_PLL_ENABLE (1 << 14)
@@ -57,8 +57,8 @@
 #define  N_1_VALUE_BASE 0x60034
 #define  LINK_M_1_VALUE_BASE 0x60040
 #define  LINK_N_1_VALUE_BASE 0x60044
-#define  PIPE_ENABLE (1 << 31)
-#define  PLANE_ENABLE (1 << 31)
+#define  PIPE_ENABLE (1u << 31)
+#define  PLANE_ENABLE (1u << 31)
 #define  FDI_RX_TU_SIZE_BASE 0xF0030
 #define  FDI_RX_IMR_BASE 0xf0018
 #define  FDI_RX_SYMBOL_LOCK (1 << 9)
@@ -71,7 +71,7 @@
 #define  FDI_LINK_TRAIN_400MV_6DB_SNB_B (0x3a << 22)
 #define  FDI_LINK_TRAIN_600MV_3_5DB_SNB_B (0x39 << 22)
 #define  FDI_LINK_TRAIN_800MV_0DB_SNB_B (0x38 << 22)
-#define  FDI_ENABLE (1 << 31)
+#define  FDI_ENABLE (1u << 31)
 #define  FDI_RX_MISC 0xF0010
 #define  FDI_RX_TP1_TO_TP2_48 (2 << 20)
 #define  FDI_RX_FDI_DELAY_90 (0x90 << 0)
@@ -104,7 +104,7 @@
 #define    GMBUS_RATE_1MHZ	(3 << 8) /* reserved on Pineview */
 #define    GMBUS_HOLD_EXT	(1 << 7) /* 300ns hold time, rsvd on Pineview */
 #define    GMBUS_BYTE_CNT_OVERRIDE (1 << 6)
-#define    GMBUS_SW_CLR_INT	(1 << 31)
+#define    GMBUS_SW_CLR_INT	(1u << 31)
 #define    GMBUS_SW_RDY		(1 << 30)
 #define    GMBUS_ENT		(1 << 29) /* enable timeout */
 #define    GMBUS_CYCLE_NONE	(0 << 25)
@@ -130,7 +130,7 @@
 #define    GMBUS_IDLE_EN		(1 << 2)
 #define    GMBUS_HW_WAIT_EN	(1 << 1)
 #define    GMBUS_HW_RDY_EN	(1 << 0)
-#define    GMBUS_2BYTE_INDEX_EN	(1 << 31)
+#define    GMBUS_2BYTE_INDEX_EN	(1u << 31)
 
 typedef struct PllParams {
     int n, m1, m2, p1, p2;
@@ -261,18 +261,18 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     //4: Disable CPU planes (VGA or hires) 
     volatile uint32_t* primary_plane_control = (uint32_t*)(gpu->mmio_start + PRI_CTL_BASE + crtc->pipe_id * 0x1000);
     volatile uint32_t* cursor_plane_control = (uint32_t*)(gpu->mmio_start + CUR_CTL_BASE + crtc->pipe_id * 0x1000);
-    set_mask(primary_plane_control, 0, (1 << 31));
-    set_mask(cursor_plane_control, 0, (1 << 31));
+    set_mask(primary_plane_control, 0, (1u << 31));
+    set_mask(cursor_plane_control, 0, (1u << 31));
 
     //5: disable cpu pipe
     volatile uint32_t* pipe_config = (uint32_t*)(gpu->mmio_start + PIPE_CONF_BASE + crtc->pipe_id * 0x1000);
-    set_mask(pipe_config, 0, (1 << 31));
+    set_mask(pipe_config, 0, (1u << 31));
     //6: Wait for CPU pipe off status
     wait_mask(pipe_config, 0, (1 << 30));
 
     //disable vga
     volatile uint32_t* vga_control = (uint32_t*)(gpu->mmio_start + VGA_CONTROL);
-    set_mask(vga_control, 1, (1 << 31));
+    set_mask(vga_control, 1, (1u << 31));
     
     //7: Disable CPU panel fitter
     volatile uint32_t* pf_ctl = (uint32_t*)(gpu->mmio_start + PF_CTRL_BASE + 0x800 * crtc->pipe_id);
@@ -298,15 +298,15 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     } else {
         //10: If disabling any port on PCH:
         //a: disable cpu fdi transmitter and pch fdi receiver, also clear the auto training bits in the same write as the disable bits
-        set_mask(fdi_tx_ctl, 0, (1 << 31) | (1 << 10));
+        set_mask(fdi_tx_ctl, 0, (1u << 31) | (1 << 10));
         (void)*fdi_tx_ctl;
-        *fdi_rx_ctl &= ~((1 << 31) | (1 << 10));
+        *fdi_rx_ctl &= ~((1u << 31) | (1 << 10));
         (void)*fdi_rx_ctl;
         lil_sleep(1);
         //b: disable port 
         crtc->connector->set_state(
                 gpu, crtc->connector,
-                crtc->connector->get_state(gpu, crtc->connector) & ~(1 << 31)
+                crtc->connector->get_state(gpu, crtc->connector) & ~(1u << 31)
             );
         //c: disable pch transcoder
         *pch_trans_conf &= ~TRANS_ENABLE;
@@ -318,8 +318,8 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
         //TODO: shared dpll support here
         //since we only support lvds at this point disable all dplls and enable only 1 later
         set_mask(dpll_sel, 0, (1 << 11) | (1 << 8) | (1 << 7) | (1 << 4) | (1 << 3) | (1 << 0));
-        set_mask(dpll_a_ctl, 0, (1 << 31));
-        set_mask(dpll_b_ctl, 0, (1 << 31));
+        set_mask(dpll_a_ctl, 0, (1u << 31));
+        set_mask(dpll_b_ctl, 0, (1u << 31));
 
         //TODO this should only be done if disabling the last pch transcoder
         set_mask(fdi_rx_ctl, 0, FDI_PCDCLK);
@@ -376,7 +376,7 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     //enable connector again (done here because of linux)
     crtc->connector->set_state(
             gpu, crtc->connector,
-            crtc->connector->get_state(gpu, crtc->connector) | (1 << 31)
+            crtc->connector->get_state(gpu, crtc->connector) | (1u << 31)
         );
  
     //c: Leave panel power override enabled until later step
@@ -531,7 +531,7 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         //in general figure out how dpll sharing works
         uint8_t pipe_to_sel_bit[] = {3, 7, 11};
 	    set_mask(dpll_sel, 1, (1 << pipe_to_sel_bit[crtc->pipe_id]));
-        set_mask(dpll_a_ctl, 1, (1 << 31));
+        set_mask(dpll_a_ctl, 1, (1u << 31));
         (void)dpll_a_ctl;
         lil_sleep(100);
 	    //f: Configure PCH transcoder timings, M/N/TU, and other transcoder settings
@@ -568,10 +568,10 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         lil_sleep(100);
 	    //h: Enable PCH transcoder
         temp = *pch_trans_workaround;
-        temp |= (1 << 31);
+        temp |= (1u << 31);
         temp &= ~(3 << 27);
         *pch_trans_workaround = temp;
-        set_mask(pch_trans_conf, 1, (1 << 31));
+        set_mask(pch_trans_conf, 1, (1u << 31));
         wait_mask(pch_trans_conf, 1, (1 << 30));
         (void)*pch_trans_conf;
         lil_sleep(100);

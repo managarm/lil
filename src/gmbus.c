@@ -1,5 +1,6 @@
 #include "gmbus.h"
 #include "imports.h"
+#include "edid.h"
 
 #include <stddef.h>
 
@@ -23,56 +24,9 @@
 #define GMBUS_OFFSET(x) ((x & GMBUS_OFFSET_MASK) << GMBUS_OFFSET_SHIFT)
 #define GMBUS_READ 1
 #define GMBUS_SW_READY (1 << 30)
-#define GMBUS_CLEAR_INTERRUPT (1 << 31)
+#define GMBUS_CLEAR_INTERRUPT (1u << 31)
 
-typedef struct EdidTiming {
-    uint8_t resolution;
-    uint8_t frequency;
-} EdidTiming;
 
-typedef struct DetailTiming {
-    uint16_t pixelClock;
-    uint8_t horzActive;
-    uint8_t horzBlank;
-    uint8_t horzActiveBlankMsb;
-    uint8_t vertActive;
-    uint8_t vertBlank;
-    uint8_t vertActiveBlankMsb;
-    uint8_t horzSyncOffset;
-    uint8_t horzSyncPulse;
-    uint8_t vertSync;
-    uint8_t syncMsb;
-    uint8_t dimensionWidth;
-    uint8_t dimensionHeight;
-    uint8_t dimensionMsb;
-    uint8_t horzBorder;
-    uint8_t vertBorder;
-    uint8_t features;
-} DetailTiming;
-
-typedef struct DisplayData {
-    uint8_t magic[8];
-    uint16_t vendorId;
-    uint16_t productId;
-    uint32_t serialNumber;
-    uint8_t manufactureWeek;
-    uint8_t manufactureYear;
-    uint8_t structVersion;
-    uint8_t structRevision;
-    uint8_t inputParameters;
-    uint8_t screenWidth;
-    uint8_t screenHeight;
-    uint8_t gamma;
-    uint8_t features;
-    uint8_t colorCoordinates[10];
-    uint8_t estTimings1;
-    uint8_t estTimings2;
-    uint8_t vendorTimings;
-    EdidTiming standardTimings[8];
-    DetailTiming detailTimings[4];
-    uint8_t numExtensions;
-    uint8_t checksum;
-} DisplayData;
 
 static void gmbus_wait_progress(LilGpu* gpu) {
     volatile uint32_t* gmbus_status = (uint32_t*)(gpu->mmio_start + GMBUS_STATUS + gpu->gpio_start);
@@ -135,33 +89,17 @@ static void gmbus_read(LilGpu* gpu, int pin_pair, uint32_t offset, uint32_t len,
     gmbus_wait_completion(gpu);
 }
 
-static void edid_to_mode(DisplayData edid, LilModeInfo* mode) {
-    mode->clock = edid.detailTimings[0].pixelClock * 10;
-
-    uint32_t horz_active = edid.detailTimings[0].horzActive | ((uint32_t)(edid.detailTimings[0].horzActiveBlankMsb >> 4) << 8);
-    uint32_t horz_blank = edid.detailTimings[0].horzBlank | ((uint32_t)(edid.detailTimings[0].horzActiveBlankMsb & 0xF) << 8);
-    uint32_t horz_sync_offset = edid.detailTimings[0].horzSyncOffset | ((uint32_t)(edid.detailTimings[0].syncMsb >> 6) << 8);
-    uint32_t horz_sync_pulse = edid.detailTimings[0].horzSyncPulse | (((uint32_t)(edid.detailTimings[0].syncMsb >> 4) & 0x3) << 8);
-    mode->hactive = horz_active;
-    mode->hsyncStart = horz_active + horz_sync_offset;
-    mode->hsyncEnd = horz_active + horz_sync_offset + horz_sync_pulse;
-    mode->htotal = horz_active + horz_blank;
-
-    uint32_t vert_active =  edid.detailTimings[0].vertActive | ((uint32_t)(edid.detailTimings[0].vertActiveBlankMsb >> 4) << 8);
-    uint32_t vert_blank = edid.detailTimings[0].vertBlank | ((uint32_t)(edid.detailTimings[0].vertActiveBlankMsb & 0xF) << 8);
-    uint32_t vert_sync_offset = (edid.detailTimings[0].vertSync >> 4) | (((uint32_t)(edid.detailTimings[0].syncMsb >> 2) & 0x3) << 4);
-    uint32_t vert_sync_pulse = (edid.detailTimings[0].vertSync & 0xF) | ((uint32_t)(edid.detailTimings[0].syncMsb & 0x3) << 4);
-    mode->vactive = vert_active;
-    mode->vsyncStart = vert_active + vert_sync_offset;
-    mode->vsyncEnd = vert_active + vert_sync_offset + vert_sync_pulse;
-    mode->vtotal = vert_active + vert_blank;
-}
-
-void lil_get_mode_info(LilGpu* gpu, LilModeInfo* out, int pin_pair) {
+uint8_t lil_gmbus_get_mode_info(LilGpu* gpu, LilModeInfo* out, int pin_pair) {
     DisplayData edid = {0};
     gmbus_read(gpu, pin_pair, 0x50, 128, (uint8_t*)&edid);
 
+    int j = 0;
     for (int i = 0; i < 4; i++) {
-        edid_to_mode(edid, &out[i]);
+        if(edid.detailTimings[i].pixelClock == 0)
+            continue; // Not a timing descriptor
+        
+        edid_timing_to_mode(&edid, edid.detailTimings[i], &out[j++]);
     }
+
+    return j;
 }
