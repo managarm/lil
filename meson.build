@@ -22,6 +22,9 @@ sources = files(
     'src/coffee_lake/dp.c',
     'src/coffee_lake/gtt.c',
     'src/coffee_lake/plane.c',
+
+	'src/vbt/parsing.c',
+	'src/vbt/vbt.c',
 )
 
 include_directories = include_directories('include')
