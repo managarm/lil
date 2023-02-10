@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../intel.h"
+#include <lil/intel.h>
 
 void lil_cfl_dp_get_mode_info(LilGpu* gpu, LilModeInfo* out);
 

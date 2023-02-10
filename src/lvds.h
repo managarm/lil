@@ -1,6 +1,6 @@
 #pragma once
 
-#include "intel.h"
+#include <lil/intel.h>
 
 bool lil_lvds_is_connected (struct LilGpu* gpu, struct LilConnector* connector);
 LilConnectorInfo lil_lvds_get_connector_info (struct LilGpu* gpu, struct LilConnector* connector);

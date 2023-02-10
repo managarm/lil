@@ -1,6 +1,7 @@
 #include "gmbus.h"
-#include "imports.h"
 #include "edid.h"
+
+#include <lil/imports.h>
 
 #include <stddef.h>
 
@@ -97,7 +98,7 @@ uint8_t lil_gmbus_get_mode_info(LilGpu* gpu, LilModeInfo* out, int pin_pair) {
     for (int i = 0; i < 4; i++) {
         if(edid.detailTimings[i].pixelClock == 0)
             continue; // Not a timing descriptor
-        
+
         edid_timing_to_mode(&edid, edid.detailTimings[i], &out[j++]);
     }
 

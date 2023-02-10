@@ -1,5 +1,6 @@
 #include "crtc.h"
-#include "../imports.h"
+
+#include <lil/imports.h>
 
 #include <stdbool.h>
 
@@ -258,7 +259,7 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     set_mask(pp_control, 0, PP_ON);
     wait_mask(pp_status, 0, PP_STATUS_ON);
 
-    //4: Disable CPU planes (VGA or hires) 
+    //4: Disable CPU planes (VGA or hires)
     volatile uint32_t* primary_plane_control = (uint32_t*)(gpu->mmio_start + PRI_CTL_BASE + crtc->pipe_id * 0x1000);
     volatile uint32_t* cursor_plane_control = (uint32_t*)(gpu->mmio_start + CUR_CTL_BASE + crtc->pipe_id * 0x1000);
     set_mask(primary_plane_control, 0, (1u << 31));
@@ -273,7 +274,7 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     //disable vga
     volatile uint32_t* vga_control = (uint32_t*)(gpu->mmio_start + VGA_CONTROL);
     set_mask(vga_control, 1, (1u << 31));
-    
+
     //7: Disable CPU panel fitter
     volatile uint32_t* pf_ctl = (uint32_t*)(gpu->mmio_start + PF_CTRL_BASE + 0x800 * crtc->pipe_id);
     volatile uint32_t* pf_winsz = (uint32_t*)(gpu->mmio_start + PF_WIN_SZ_BASE + 0x800 * crtc->pipe_id);
@@ -281,7 +282,7 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     *pf_ctl = 0;
     *pf_winsz = 0;
     *pf_winpos = 0;
-    
+
     volatile uint32_t* fdi_rx_ctl = (uint32_t*)(gpu->mmio_start + FDI_RX_CTL_BASE + 0x1000 * crtc->pipe_id);
     volatile uint32_t* fdi_tx_ctl = (uint32_t*)(gpu->mmio_start + FDI_TX_CTL_BASE + 0x1000 * crtc->pipe_id);
     volatile uint32_t* pch_trans_conf = (uint32_t*)(gpu->mmio_start + TRANS_CONF_BASE + 0x1000 * crtc->pipe_id);
@@ -292,7 +293,7 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
     volatile uint32_t* dpll_b_ctl = (uint32_t*)(gpu->mmio_start + DPLLB_CTL);
 
     if (!crtc->connector->on_pch) {
-        //8: If disabling DisplayPort on PCH, write the DisplayPort control register bit 31 to 0b. 
+        //8: If disabling DisplayPort on PCH, write the DisplayPort control register bit 31 to 0b.
         //9: If disabling CPU embedded DisplayPort A
         //TODO add displayport support
     } else {
@@ -303,7 +304,7 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
         *fdi_rx_ctl &= ~((1u << 31) | (1 << 10));
         (void)*fdi_rx_ctl;
         lil_sleep(1);
-        //b: disable port 
+        //b: disable port
         crtc->connector->set_state(
                 gpu, crtc->connector,
                 crtc->connector->get_state(gpu, crtc->connector) & ~(1u << 31)
@@ -348,7 +349,7 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     set_mask(pp_control, 1, (1 << 3));
     //b: Wait for delay given in panel requirements
     lil_sleep(100);
-   
+
     //this step is reordered due to the way linux does it
     //6: Configure CPU pipe timings, M/N/TU, and other pipe settings
     LilModeInfo mode = crtc->current_mode;
@@ -378,7 +379,7 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
             gpu, crtc->connector,
             crtc->connector->get_state(gpu, crtc->connector) | (1u << 31)
         );
- 
+
     //c: Leave panel power override enabled until later step
     //2: Enable PCH clock reference source and PCH SSC modulator, wait for warmup
     ////(already enabled in theory)
@@ -419,7 +420,7 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         *pri_surf  = crtc->planes[0].surface_address & ~0xfff;
         *pri_linoff  = crtc->planes[0].surface_address & 0xfff;
     }
-    
+
     volatile uint32_t* fdi_rx_tu_size = (uint32_t*)(gpu->mmio_start + FDI_RX_TU_SIZE_BASE + 0x1000 * crtc->pipe_id);
     volatile uint32_t* fdi_rx_imr = (uint32_t*)(gpu->mmio_start + FDI_RX_IMR_BASE + 0x1000 * crtc->pipe_id);
     volatile uint32_t* fdi_rx_misc = (uint32_t*)(gpu->mmio_start + FDI_RX_MISC + 0x1000 * crtc->pipe_id);
@@ -431,12 +432,12 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         FDI_LINK_TRAIN_600MV_3_5DB_SNB_B,
         FDI_LINK_TRAIN_800MV_0DB_SNB_B,
     };
-    
+
     if (!crtc->connector->on_pch) {
     } else {
         //9: If enabling port on PCH
         //a: Program PCH FDI Receiver TU size same as Transmitter TU size for TU error checking
-        *fdi_rx_tu_size = *pipe_m_1 & (0x3f << 25); 
+        *fdi_rx_tu_size = *pipe_m_1 & (0x3f << 25);
         //b: if Auto Train FDI
         //i: Set pre-emphasis and voltage (iterate if training steps fail)
         //ii: Enable CPU FDI Transmitter and PCH FDI Receiver with auto training enabled

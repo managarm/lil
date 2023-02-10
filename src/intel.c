@@ -1,7 +1,8 @@
-#include "intel.h"
-#include "imports.h"
+#include <lil/intel.h>
 #include "ivy_bridge/ivb.h"
 #include "coffee_lake/cfl.h"
+
+#include <lil/imports.h>
 
 void lil_init_gpu(LilGpu* ret, void* device) {
    uint32_t config_0 = lil_pci_readd(device, 0);

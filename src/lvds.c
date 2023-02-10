@@ -1,6 +1,7 @@
 #include "lvds.h"
 #include "gmbus.h"
-#include "imports.h"
+
+#include <lil/imports.h>
 
 #define LVDS_CTL 0xE1180
 

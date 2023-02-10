@@ -1,6 +1,7 @@
 #include "dp.h"
-#include "../imports.h"
 #include "../edid.h"
+
+#include <lil/imports.h>
 
 #define PWR_WELL_CTL2 0x45404
 
@@ -245,7 +246,7 @@ static uint8_t dp_aux_xfer(struct LilGpu* gpu, uint8_t* tx, uint8_t tx_size, uin
     if(status & DDI_AUX_CTL_RX_ERR)
         lil_panic("DP AUX Receive error");
 
-    
+
     uint8_t received_bytes = DDI_AUX_GET_MSG_SIZE(status);
     if(received_bytes == 0 || received_bytes > 20)
         lil_panic("DP AUX Unknown recv bytes");
@@ -256,7 +257,7 @@ static uint8_t dp_aux_xfer(struct LilGpu* gpu, uint8_t* tx, uint8_t tx_size, uin
     for(size_t i = 0; i < received_bytes; i += 4)
         dp_unpack_aux(data[i / 4], rx + i, received_bytes - i);
 
-    return received_bytes; 
+    return received_bytes;
 }
 
 static AuxResponse dp_aux_cmd(struct LilGpu* gpu, AuxRequest req) {
@@ -307,7 +308,7 @@ static void dp_aux_i2c_read(struct LilGpu* gpu, uint16_t addr, uint8_t len, uint
     AuxResponse res = {0};
     req.request = DDI_AUX_I2C_READ | DDI_AUX_I2C_MOT;
     req.address = addr;
-    req.size = 0;    
+    req.size = 0;
     dp_aux_cmd(gpu, req);
 
     for(size_t i = 0; i < len; i++) {
@@ -319,7 +320,7 @@ static void dp_aux_i2c_read(struct LilGpu* gpu, uint16_t addr, uint8_t len, uint
 
     req.request = DDI_AUX_I2C_READ;
     req.address = 0;
-    req.size = 0;    
+    req.size = 0;
     dp_aux_cmd(gpu, req);
 }
 
@@ -327,7 +328,7 @@ static void dp_aux_i2c_write(struct LilGpu* gpu, uint16_t addr, uint8_t len, uin
     AuxRequest req = {0};
     req.request = DDI_AUX_I2C_WRITE | DDI_AUX_I2C_MOT;
     req.address = addr;
-    req.size = 0;    
+    req.size = 0;
     dp_aux_cmd(gpu, req);
 
     for(size_t i = 0; i < len; i++) {
@@ -339,7 +340,7 @@ static void dp_aux_i2c_write(struct LilGpu* gpu, uint16_t addr, uint8_t len, uin
 
     req.request = DDI_AUX_I2C_READ;
     req.address = 0;
-    req.size = 0;    
+    req.size = 0;
     dp_aux_cmd(gpu, req);
 }
 
@@ -347,7 +348,7 @@ uint8_t dp_aux_native_read(struct LilGpu* gpu, uint16_t addr) {
     AuxRequest req = {0};
     req.request = DDI_AUX_NATIVE_READ;
     req.address = addr;
-    req.size = 1;    
+    req.size = 1;
     AuxResponse res = dp_aux_cmd(gpu, req);
 
     return res.data[0];
@@ -371,10 +372,10 @@ static void dp_aux_read_edid(struct LilGpu* gpu, DisplayData* buf) {
 
     uint8_t segment = block / 2;
     dp_aux_i2c_write(gpu, DDC_SEGMENT, 1, &segment);
-    
+
     uint8_t start = block * EDID_SIZE;
     dp_aux_i2c_write(gpu, DDC_ADDR, 1, &start);
-    
+
     dp_aux_i2c_read(gpu, DDC_ADDR, EDID_SIZE, (uint8_t*)buf);
 }
 
@@ -387,7 +388,7 @@ LilConnectorInfo lil_cfl_dp_get_connector_info (struct LilGpu* gpu, struct LilCo
     (void)connector;
     LilConnectorInfo ret = {0};
     LilModeInfo* info = lil_malloc(sizeof(LilModeInfo) * 4);
-    
+
     DisplayData edid = {0};
     dp_aux_read_edid(gpu, &edid);
 
@@ -414,7 +415,7 @@ uint32_t lil_cfl_dp_get_state (struct LilGpu* gpu, struct LilConnector* connecto
 
 static uint32_t get_pp_control(struct LilGpu* gpu) {
     volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
-    
+
     uint32_t v = *ctl;
 
     // Completely undocumented? Linux does it under the guise of "Unlocking registers??"
@@ -429,10 +430,10 @@ static uint32_t get_pp_control(struct LilGpu* gpu) {
 static void edp_panel_on(struct LilGpu* gpu, struct LilConnector* connector) {
     if(connector->type != EDP)
         return;
-    
+
     volatile uint32_t* sts = (uint32_t*)(gpu->mmio_start + PP_STATUS);
     volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
-    
+
     uint32_t v = get_pp_control(gpu);
     v |= PP_CONTROL_ON | PP_CONTROL_BACKLIGHT | PP_CONTROL_RESET;
 
@@ -449,10 +450,10 @@ static void edp_panel_on(struct LilGpu* gpu, struct LilConnector* connector) {
 static void edp_panel_off(struct LilGpu* gpu, struct LilConnector* connector) {
     if(connector->type != EDP)
         return;
-    
+
     volatile uint32_t* sts = (uint32_t*)(gpu->mmio_start + PP_STATUS);
     volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
-    
+
     uint32_t v = get_pp_control(gpu);
     v &= ~(PP_CONTROL_ON | PP_CONTROL_RESET | PP_CONTROL_BACKLIGHT | PP_CONTROL_FORCE_VDD);
 
@@ -469,10 +470,10 @@ static void edp_panel_off(struct LilGpu* gpu, struct LilConnector* connector) {
 static void edp_panel_vdd_on(struct LilGpu* gpu, struct LilConnector* connector) {
     if(connector->type != EDP)
         return;
-    
+
     volatile uint32_t* sts = (uint32_t*)(gpu->mmio_start + PP_STATUS);
     volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
-    
+
     uint32_t v = get_pp_control(gpu);
     v |= PP_CONTROL_FORCE_VDD;
 
@@ -483,10 +484,10 @@ static void edp_panel_vdd_on(struct LilGpu* gpu, struct LilConnector* connector)
 static void edp_panel_backlight_off(struct LilGpu* gpu, struct LilConnector* connector) {
     if(connector->type != EDP)
         return;
-    
+
     volatile uint32_t* sts = (uint32_t*)(gpu->mmio_start + PP_STATUS);
     volatile uint32_t* ctl = (uint32_t*)(gpu->mmio_start + PP_CONTROL);
-    
+
     uint32_t v = get_pp_control(gpu);
     v &= ~PP_CONTROL_BACKLIGHT;
     *ctl = v;
@@ -609,7 +610,7 @@ static uint32_t dpcd_speed_to_dpll(uint8_t dpll, uint8_t rate) {
 void lil_cfl_dp_pre_enable(struct LilGpu* gpu, struct LilConnector* connector) {
     /*edp_panel_on(gpu, connector);
 
-    
+
 
     volatile uint32_t* mg_dp_ln0 = (uint32_t*)(gpu->mmio_start + MG_DP_MODE(0, connector->crtc->pipe_id));
     volatile uint32_t* mg_dp_ln1 = (uint32_t*)(gpu->mmio_start + MG_DP_MODE(1, connector->crtc->pipe_id));
@@ -668,7 +669,7 @@ void lil_cfl_dp_pre_enable(struct LilGpu* gpu, struct LilConnector* connector) {
     *mg_dp_ln0 = ln0;
     *mg_dp_ln1 = ln1;*/
 
-   
+
    edp_panel_on(gpu, connector);
 
     uint32_t dpll_sel[] = {1, 3, 2};

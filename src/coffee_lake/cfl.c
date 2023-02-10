@@ -1,7 +1,8 @@
 #include "cfl.h"
 #include "../pci.h"
-#include "../imports.h"
 #include "../lvds.h"
+
+#include <lil/imports.h>
 
 #include "crtc.h"
 #include "dp.h"
