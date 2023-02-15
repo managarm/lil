@@ -405,11 +405,11 @@ LilConnectorInfo lil_cfl_dp_get_connector_info (struct LilGpu* gpu, struct LilCo
 }
 
 void lil_cfl_dp_set_state (struct LilGpu* gpu, struct LilConnector* connector, uint32_t state) {
-    // TODO
+	lil_panic("unimplemented");
 }
 
 uint32_t lil_cfl_dp_get_state (struct LilGpu* gpu, struct LilConnector* connector) {
-    // TODO
+	lil_panic("unimplemented");
 }
 
 static uint32_t get_pp_control(struct LilGpu* gpu) {

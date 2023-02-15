@@ -336,7 +336,7 @@ void lil_ivb_shutdown (struct LilGpu* gpu, struct LilCrtc* crtc) {
 //TODO check what "panel requirements" are
 void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     lil_sleep(10);
-    PllParams params;
+    PllParams params = {};
     if (!find_params(&crtc->connector->limits, &crtc->current_mode, &params)) {
         //todo errors
     }

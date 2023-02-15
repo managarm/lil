@@ -1,12 +1,16 @@
 project('lil', 'c')
 
+add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter'], language: 'c')
+
+c_std = 'gnu2x'
+
 sources = files(
     'src/edid.c',
     'src/gmbus.c',
     'src/intel.c',
     'src/lvds.c',
     'src/pci.c',
-    
+
     'src/ivy_bridge/crtc.c',
     'src/ivy_bridge/gtt.c',
     'src/ivy_bridge/interrupt.c',
