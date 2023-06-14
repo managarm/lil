@@ -354,12 +354,31 @@ uint8_t dp_aux_native_read(struct LilGpu* gpu, uint16_t addr) {
     return res.data[0];
 }
 
-static void dp_aux_native_write(struct LilGpu* gpu, uint16_t addr, uint8_t v) {
+void dp_aux_native_readn(struct LilGpu* gpu, uint16_t addr, size_t n, void *buf) {
+    AuxRequest req = {0};
+    req.request = DDI_AUX_NATIVE_READ;
+    req.address = addr;
+    req.size = n;
+    AuxResponse res = dp_aux_cmd(gpu, req);
+
+    memcpy(buf, res.data, n);
+}
+
+void dp_aux_native_write(struct LilGpu* gpu, uint16_t addr, uint8_t v) {
     AuxRequest req = {0};
     req.request = DDI_AUX_NATIVE_WRITE;
     req.address = addr;
     req.size = 1;
     req.tx[0] = v;
+    dp_aux_cmd(gpu, req);
+}
+
+void dp_aux_native_writen(struct LilGpu* gpu, uint16_t addr, size_t n, void *buf) {
+    AuxRequest req = {0};
+    req.request = DDI_AUX_NATIVE_WRITE;
+    req.address = addr;
+    req.size = n;
+    memcpy(req.tx, buf, n);
     dp_aux_cmd(gpu, req);
 }
 

@@ -23,3 +23,6 @@ typedef struct {
 LilDpMnValues lil_cfl_dp_calculate_mn(LilGpu* gpu, LilModeInfo* mode);
 
 uint8_t dp_aux_native_read(struct LilGpu* gpu, uint16_t addr);
+void dp_aux_native_readn(struct LilGpu* gpu, uint16_t addr, size_t n, void *buf);
+void dp_aux_native_write(struct LilGpu* gpu, uint16_t addr, uint8_t v);
+void dp_aux_native_writen(struct LilGpu* gpu, uint16_t addr, size_t n, void *buf);
