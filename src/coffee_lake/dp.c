@@ -41,22 +41,10 @@
 #define DDI_AUX_NATIVE_WRITE 0x8
 #define DDI_AUX_NATIVE_READ 0x9
 
-#define DPCD_REV 0x0
-#define DPCD_MAX_LINK_RATE 0x1
-#define DPCD_MAX_LANE_COUNT 0x2
-#define DPCD_MAX_DOWNSPREAD 0x3
 #define NO_AUX_HANDSHAKE_LINK_TRAINING (1 << 6)
 
-#define DPCD_DOWNSTREAMPORT_PRESENT 0x5
-#define DPCD_EDP_CONFIGURATION_CAP 0xD
-#define DPCD_DOWNSTREAM_PORT0_CAP 0x80
-
-#define DPCD_TRAIN_PATTERN 0x102
-
-#define DPCD_SET_POWER 0x600
 #define DPCD_POWER_D0 1
 #define DPCD_POWER_D3 2
-
 
 #define DP_TP_CTL(c) (0x64040 + ((c) * 0x100))
 #define DP_TP_STS(c) (0x64044 + ((c) * 0x100))
@@ -531,15 +519,15 @@ static void dp_set_sink_power(struct LilGpu* gpu, struct LilConnector* connector
     if(on) {
         lil_panic("TODO: Turn Sink on");
     } else {
-        uint8_t downstream = dp_aux_native_read(gpu, DPCD_DOWNSTREAMPORT_PRESENT);
+        uint8_t downstream = dp_aux_native_read(gpu, DOWNSTREAMPORT_PRESENT);
         if(rev == 0x11 && (downstream & 1)) {
-            uint8_t port0 = dp_aux_native_read(gpu, DPCD_DOWNSTREAM_PORT0_CAP);
+            uint8_t port0 = dp_aux_native_read(gpu, DOWNSTREAM_PORT0_CAP);
             if(port0 & (1 << 3)) { // HPD Aware
                 return;
             }
         }
 
-        dp_aux_native_write(gpu, DPCD_SET_POWER, DPCD_POWER_D3);
+        dp_aux_native_write(gpu, SET_POWER, DPCD_POWER_D3);
     }
 }
 
@@ -567,7 +555,7 @@ void lil_cfl_dp_init(struct LilGpu* gpu, struct LilConnector* connector) {
 
     *cstate &= ~0x3; // Disable DC5 and DC6 state*/
 
-    uint8_t cap = dp_aux_native_read(gpu, DPCD_EDP_CONFIGURATION_CAP);
+    uint8_t cap = dp_aux_native_read(gpu, EDP_CONFIGURATION_CAP);
     connector->type = (cap != 0) ? EDP : DISPLAYPORT; // Hacky, but it should work on any eDP display that is semi-modern, better option is to parse VBIOS
 
     edp_panel_on(gpu, connector);
@@ -701,7 +689,7 @@ void lil_cfl_dp_pre_enable(struct LilGpu* gpu, struct LilConnector* connector) {
     v |= DPLL_CTRL1_PROGRAM_ENABLE(dpll);
     v &= ~DPLL_CTRL1_HDMI_MODE(dpll); // DP mode
     v &= ~DPLL_CTRL1_LINK_RATE_MASK(dpll);
-    v |= DPLL_CTRL1_LINK_RATE(dpll, dp_aux_native_read(gpu, DPCD_MAX_LINK_RATE));
+    v |= DPLL_CTRL1_LINK_RATE(dpll, dp_aux_native_read(gpu, MAX_LINK_RATE));
     *dpll_ctrl1 = v;
     (void)*dpll_ctrl1;
 
@@ -739,7 +727,7 @@ void lil_cfl_dp_pre_enable(struct LilGpu* gpu, struct LilConnector* connector) {
 
     lil_sleep(5);
 
-    if(dp_aux_native_read(gpu, DPCD_REV) == 0x11 && dp_aux_native_read(gpu, DPCD_MAX_DOWNSPREAD) & NO_AUX_HANDSHAKE_LINK_TRAINING) {
+    if(dp_aux_native_read(gpu, DPCD_REV) == 0x11 && dp_aux_native_read(gpu, MAX_DOWNSPREAD) & NO_AUX_HANDSHAKE_LINK_TRAINING) {
         lil_sleep(2);
         v = *dp_tp_ctl;
         v &= ~DP_TP_CTL_TRAIN_MASK;
@@ -793,7 +781,7 @@ LilDpMnValues lil_cfl_dp_calculate_mn(LilGpu* gpu, LilModeInfo* mode) {
 
     uint64_t m = 3 * mode->bpc * mode->clock * 1000;
 
-    uint8_t link_rate = dp_aux_native_read(gpu, DPCD_MAX_LINK_RATE);
+    uint8_t link_rate = dp_aux_native_read(gpu, MAX_LINK_RATE);
     uint64_t symbol_rate = 0;
     if(link_rate == 0x6)
         symbol_rate = 162000000;
@@ -804,7 +792,7 @@ LilDpMnValues lil_cfl_dp_calculate_mn(LilGpu* gpu, LilModeInfo* mode) {
     else
         lil_panic("Unknown DP Link Speed");
 
-    uint64_t n = 8 * symbol_rate * (dp_aux_native_read(gpu, DPCD_MAX_LANE_COUNT) & 0xF);
+    uint64_t n = 8 * symbol_rate * (dp_aux_native_read(gpu, MAX_LANE_COUNT) & 0xF);
     cancel_m_n(&m, &n, DATA_N_MAX);
     ret.data_m = m;
     ret.data_n = n;
