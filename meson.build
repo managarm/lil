@@ -1,6 +1,6 @@
-project('lil', 'c')
+project('lil', ['c'], default_options: ['warning_level=2'])
 
-add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter'], language: 'c')
+add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter', '-Wimplicit-fallthrough'], language: 'c')
 
 c_std = 'gnu2x'
 
