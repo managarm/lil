@@ -21,5 +21,6 @@ __attribute__((weak)) void lil_usleep(uint64_t us);
 __attribute__((weak)) void* lil_malloc(size_t s);
 __attribute__((weak)) void lil_free(void* p);
 __attribute__((weak)) void* lil_map(size_t loc, size_t len);
+__attribute__((weak)) void lil_unmap(void *loc, size_t len);
 __attribute__((weak)) void lil_log(enum LilLogType type, const char *fmt, ...);
 __attribute__((weak, noreturn)) void lil_panic(const char* msg);
