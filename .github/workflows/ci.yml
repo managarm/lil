@@ -1,0 +1,26 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+    build-lil:
+        name: Build lil
+        runs-on: ubuntu-20.04
+        steps:
+          - name: Install prerequisites
+            run: |
+                set -x
+                sudo apt-get update
+                sudo apt-get install meson
+          - name: Checkout lil
+            uses: actions/checkout@v2
+          - name: Prepare build
+            run: |
+                set -x
+                mkdir -p build/
+                meson setup --buildtype=debugoptimized build/
+          - name: Build lil
+            run: |
+                set -x
+                ninja
+            working-directory: build/
