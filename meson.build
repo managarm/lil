@@ -27,6 +27,14 @@ sources = files(
 	'src/vbt/vbt.c',
 )
 
+util_vbt_sources = files(
+	'utils/vbt/vbt.c',
+)
+
 include_directories = include_directories('include')
 library = static_library('lil', sources, include_directories: include_directories, pic: false)
 dependency = declare_dependency(link_with: library, include_directories: include_directories)
+
+if get_option('build_utils')
+	util_vbt = executable('vbt', util_vbt_sources, dependencies: dependency, native: true)
+endif
