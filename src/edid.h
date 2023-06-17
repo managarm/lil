@@ -1,6 +1,6 @@
 #pragma once
 
-#include "intel.h"
+#include <lil/intel.h>
 
 typedef struct EdidTiming {
     uint8_t resolution;

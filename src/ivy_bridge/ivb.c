@@ -1,13 +1,14 @@
 #include "ivb.h"
 #include "../pci.h"
-#include "../imports.h"
-#include "../intel.h"
+#include <lil/intel.h>
 #include "../lvds.h"
 #include "../gmbus.h"
 #include "crtc.h"
 #include "interrupt.h"
 #include "plane.h"
 #include "gtt.h"
+
+#include <lil/imports.h>
 
 #define PCI_MGGC0 0x50
 
@@ -41,7 +42,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
 
     ret->gtt_address = ret->mmio_start + (2 * 1024 * 1024);
     ret->gtt_size = get_gtt_size(device);
-    
+
     ret->gtt_address = ret->mmio_start + (len / 2); // Half of the BAR space is registers, half is GTT PTEs
     ret->gtt_size = get_gtt_size(device);
     ret->vmem_clear = lil_ivb_vmem_clear;
@@ -49,7 +50,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
 
     lil_get_bar(device, 2, &base, &len);
     ret->vram = (uintptr_t)lil_map(base, len);
-   
+
     //TODO currently we only support LVDS
 
     ret->num_connectors = 1;

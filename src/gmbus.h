@@ -1,5 +1,5 @@
 #pragma once
-#include "intel.h"
+#include <lil/intel.h>
 
 #include <stdint.h>
 #include <stddef.h>

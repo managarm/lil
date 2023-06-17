@@ -1,4 +1,8 @@
-project('lil', 'c')
+project('lil', ['c'], default_options: ['warning_level=2'])
+
+add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter', '-Wimplicit-fallthrough'], language: 'c')
+
+c_std = 'gnu2x'
 
 sources = files(
     'src/edid.c',
@@ -6,7 +10,7 @@ sources = files(
     'src/intel.c',
     'src/lvds.c',
     'src/pci.c',
-    
+
     'src/ivy_bridge/crtc.c',
     'src/ivy_bridge/gtt.c',
     'src/ivy_bridge/interrupt.c',
@@ -18,8 +22,19 @@ sources = files(
     'src/coffee_lake/dp.c',
     'src/coffee_lake/gtt.c',
     'src/coffee_lake/plane.c',
+
+	'src/vbt/parsing.c',
+	'src/vbt/vbt.c',
 )
 
-library = static_library('lil', sources, pic: false)
+util_vbt_sources = files(
+	'utils/vbt/vbt.c',
+)
 
-dependency = declare_dependency(link_with: library)
+include_directories = include_directories('include')
+library = static_library('lil', sources, include_directories: include_directories, pic: false)
+dependency = declare_dependency(link_with: library, include_directories: include_directories)
+
+if get_option('build_utils')
+	util_vbt = executable('vbt', util_vbt_sources, dependencies: dependency, native: true)
+endif

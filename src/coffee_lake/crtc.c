@@ -1,5 +1,6 @@
 #include "crtc.h"
-#include "../imports.h"
+
+#include <lil/imports.h>
 
 #include "dp.h"
 
@@ -112,7 +113,7 @@ uint32_t sbi_reg_rw(struct LilGpu* gpu, uint16_t reg, uint32_t dst, uint32_t v, 
 
     if(!write)
         return *data;
-    
+
     return 0;
 }
 
@@ -232,7 +233,7 @@ void lil_cfl_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     volatile uint32_t* trans_conf = (uint32_t*)(gpu->mmio_start + TRANS_CONF(crtc->pipe_id));
     if(crtc->connector->type == EDP)
         trans_conf = (uint32_t*)(gpu->mmio_start + TRANS_CONF_EDP);
-    
+
     *trans_conf |= TRANS_CONF_ENABLE;
 
     while(!(*trans_conf & TRANS_CONF_STATUS))

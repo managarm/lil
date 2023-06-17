@@ -1,5 +1,6 @@
 #include "gtt.h"
-#include "../imports.h"
+
+#include <lil/imports.h>
 
 void lil_cfl_vmem_clear(LilGpu* gpu) {
     for (size_t i = 0; i < (gpu->gtt_size >> 12); i++) {
