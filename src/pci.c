@@ -5,6 +5,10 @@
 #include <stddef.h>
 
 void lil_get_bar(void* device, int bar, uintptr_t* obase, uintptr_t* len) {
+	/* disable Bus Mastering and Memory + I/O space access */
+	uint16_t command = lil_pci_readw(device, 4);
+	lil_pci_writew(device, 4, command & ~7); /* Bus Master | Memory Space | I/O Space */
+
     size_t reg_index = 0x10 + bar * 4;
     uint64_t bar_low = lil_pci_readd(device, reg_index), bar_size_low;
     uint64_t bar_high = 0, bar_size_high = ~0;
@@ -35,4 +39,7 @@ void lil_get_bar(void* device, int bar, uintptr_t* obase, uintptr_t* len) {
 
     *obase = base;
     *len = size;
+
+	/* restore Bus Mastering and Memory + I/O space access */
+	lil_pci_writew(device, 4, command);
 }
