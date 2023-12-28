@@ -12,6 +12,7 @@ enum LilLogType {
 	WARNING,
 	INFO,
 	VERBOSE,
+	DEBUG,
 };
 
 __attribute__((nonnull(1, 2))) void *memcpy(void *dest, const void *src, size_t n);
