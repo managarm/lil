@@ -48,6 +48,7 @@ void lil_sleep(uint64_t ms);
 void lil_usleep(uint64_t us);
 __attribute__((malloc, returns_nonnull)) void* lil_malloc(size_t s);
 __attribute__((nonnull(1))) void lil_free(void* p);
+__attribute__((nonnull(1, 3, 4))) void lil_get_bar(void *device, int bar, uintptr_t *obase, uintptr_t *len);
 __attribute__((weak, returns_nonnull)) void* lil_map(size_t loc, size_t len);
 __attribute__((weak, nonnull(1))) void lil_unmap(void *loc, size_t len);
 __attribute__((format(printf, 2, 3), nonnull(2))) void lil_log(enum LilLogType type, const char *fmt, ...);

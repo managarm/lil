@@ -18,7 +18,6 @@ sources = files(
     'src/gmbus.c',
     'src/intel.c',
     'src/lvds.c',
-    'src/pci.c',
 
     'src/ivy_bridge/crtc.c',
     'src/ivy_bridge/gtt.c',
