@@ -14,7 +14,6 @@ const struct vbt_header *vbt_get_header(const void *vbt, size_t size) {
 		return header;
 	}
 
-	lil_log(WARNING, "no VBT header found");
 	return NULL;
 }
 
