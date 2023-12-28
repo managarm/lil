@@ -43,6 +43,8 @@ enum bdb_block_id {
 
 /* block 1 */
 struct bdb_general_features {
+	struct bdb_block_header header;
+
 	uint8_t panel_fitting: 2;
 	uint8_t flexaim: 1;
 	uint8_t msg_enable: 1;
@@ -247,7 +249,7 @@ struct bdb_driver_features {
 #define LVDS_CONFIG_EDP 3
 	uint16_t lvds_config: 2;
 	uint16_t tv_hotplug: 1;
-	uint16_t hdmi_hotplug: 1;
+	uint16_t hdmi_config: 2;
 
 	uint8_t _bits1;
 
