@@ -1,8 +1,17 @@
-project('lil', ['c'], default_options: ['warning_level=2'])
+project('lil', ['c', 'cpp'],
+	default_options: ['warning_level=2', 'c_std=gnu2x', 'cpp_std=gnu++23'],
+	meson_version: '>=1.3.0',
+)
 
-add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter', '-Wimplicit-fallthrough'], language: 'c')
+header_only = get_option('header_only')
+build_utils = get_option('build_utils')
 
-c_std = 'gnu2x'
+if not header_only and (meson.get_compiler('cpp').get_id() != 'gcc' or meson.get_compiler('cpp').version().version_compare('<13'))
+	error('At least GCC g++ 13 is needed to compile lil.')
+endif
+
+add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter', '-Wimplicit-fallthrough'], language: ['c', 'cpp'])
+add_project_arguments(['-Werror=incompatible-pointer-types'], language: ['c'])
 
 sources = files(
     'src/edid.c',
@@ -32,9 +41,14 @@ util_vbt_sources = files(
 )
 
 include_directories = include_directories('include')
-library = static_library('lil', sources, include_directories: include_directories, pic: false)
-dependency = declare_dependency(link_with: library, include_directories: include_directories)
 
-if get_option('build_utils')
-	util_vbt = executable('vbt', util_vbt_sources, dependencies: dependency, native: true)
+if header_only
+	lil_dep = declare_dependency(include_directories: include_directories)
+else
+	library = static_library('lil', sources, include_directories: include_directories, pic: false, install: not header_only)
+	lil_dep = declare_dependency(link_with: library, include_directories: include_directories)
+endif
+
+if build_utils
+	util_vbt = executable('vbt', util_vbt_sources, dependencies: lil_dep, native: true, install: true)
 endif
