@@ -35,6 +35,14 @@ typedef struct LilModeInfo {
  * Note: intel gpus only have one valid (connector, encoder, crtc)
  */
 
+enum LilDdiId {
+	DDI_A,
+	DDI_B,
+	DDI_C,
+	DDI_D,
+	DDI_E,
+};
+
 typedef enum LilPlaneType {
     PRIMARY, CURSOR, SPRITE,
 } LilPlaneType;
@@ -143,6 +151,8 @@ typedef struct LilGpu {
 
     void (*vmem_clear) (struct LilGpu* gpu);
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
+
+    void *dev;
 } LilGpu;
 
 /*

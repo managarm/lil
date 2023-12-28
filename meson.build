@@ -6,7 +6,7 @@ project('lil', ['c', 'cpp'],
 header_only = get_option('header_only')
 build_utils = get_option('build_utils')
 
-if not header_only and (meson.get_compiler('cpp').get_id() != 'gcc' or meson.get_compiler('cpp').version().version_compare('<13'))
+if not (header_only or build_utils) and (meson.get_compiler('cpp').get_id() != 'gcc' or meson.get_compiler('cpp').version().version_compare('<13'))
 	error('At least GCC g++ 13 is needed to compile lil.')
 endif
 
@@ -32,12 +32,12 @@ sources = files(
     'src/coffee_lake/gtt.c',
     'src/coffee_lake/plane.c',
 
-	'src/vbt/parsing.c',
-	'src/vbt/vbt.c',
+	'src/vbt/parsing.cpp',
+	'src/vbt/vbt.cpp',
 )
 
 util_vbt_sources = files(
-	'utils/vbt/vbt.c',
+	'utils/vbt/vbt.cpp',
 )
 
 include_directories = include_directories('include')

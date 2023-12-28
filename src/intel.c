@@ -16,6 +16,8 @@ void lil_init_gpu(LilGpu* ret, void* device) {
         return;
     }
 
+	ret->dev = device;
+
     switch (device_id) {
         case 0x0166 : {
             ret->gen = GEN_IVB;

@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "intel.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,10 +17,18 @@ enum LilLogType {
 	DEBUG,
 };
 
+#ifndef __STDC_HOSTED__
+
 __attribute__((nonnull(1, 2))) void *memcpy(void *dest, const void *src, size_t n);
 __attribute__((nonnull(1, 2))) int memcmp(const void *s1, const void *s2, size_t n);
 __attribute__((nonnull(1))) void *memset(void *s, int c, size_t n);
 __attribute__((nonnull(1, 2))) int strcmp(const char *s1, const char *s2);
+
+#else
+
+#include <string.h>
+
+#endif
 
 __attribute__((nonnull(1))) void lil_pci_writeb(void* device, uint16_t offset, uint8_t val);
 __attribute__((nonnull(1))) uint8_t lil_pci_readb(void* device, uint16_t offset);
@@ -42,6 +52,8 @@ __attribute__((weak, returns_nonnull)) void* lil_map(size_t loc, size_t len);
 __attribute__((weak, nonnull(1))) void lil_unmap(void *loc, size_t len);
 __attribute__((format(printf, 2, 3), nonnull(2))) void lil_log(enum LilLogType type, const char *fmt, ...);
 __attribute__((noreturn, nonnull(1))) void lil_panic(const char* msg);
+
+__attribute__((weak)) const struct vbt_header *lil_vbt_locate(struct LilGpu *gpu);
 
 #ifdef __cplusplus
 }
