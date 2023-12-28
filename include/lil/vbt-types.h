@@ -32,10 +32,13 @@ enum bdb_block_id {
 	BDB_GENERAL_FEATURES = 1,
 	BDB_GENERAL_DEFINITIONS = 2,
 	BDB_DRIVER_FEATURES = 12,
+	BDB_OEM_MODE = 20,
 	BDB_EDP = 27,
 	BDB_LVDS_OPTIONS = 40,
 	BDB_LVDS_BLC = 43,
+	BDB_FIXED_MODE_SET = 51,
 	BDB_MIPI_SEQUENCE = 53,
+	BDB_PRD_BOOT_TABLE = 253,
 };
 
 /* block 1 */
@@ -233,6 +236,24 @@ struct bdb_driver_features {
 	uint16_t _bits3;
 } __attribute__((packed));
 
+/* block 20 */
+struct oem_mode_entry {
+	uint8_t mode_flags;
+	uint8_t display_flags;
+	uint16_t x_res;
+	uint16_t y_res;
+	uint8_t bpp;
+	uint8_t refresh;
+	uint8_t dtd[18];
+} __attribute__((packed));
+
+struct bdb_oem_mode {
+	struct bdb_block_header header;
+	uint8_t num;
+	uint8_t entry_size;
+	struct oem_mode_entry entries[6];
+} __attribute__((packed));
+
 /* block 27 */
 struct edp_power_seq {
 	uint16_t t3;
@@ -346,4 +367,27 @@ struct bdb_lfp_blc {
 	struct lfp_backlight_data_entry panel[16];
 	uint8_t level[16];
 	struct lfp_backlight_control_method backlight_control[16];
+} __attribute__((packed));
+
+/* block 51 */
+struct bdb_fixed_mode_set {
+	struct bdb_block_header header;
+
+	uint8_t feature_enable;
+	uint32_t x_res;
+	uint32_t y_res;
+} __attribute__((packed));
+
+/* block 254 */
+struct prd_entry {
+	uint8_t attach_bits;
+	uint8_t pipe_a;
+	uint8_t pipe_b;
+} __attribute__((packed));
+
+struct bdb_prd_boot_table {
+	struct bdb_block_header header;
+
+	struct prd_entry entries[16];
+	uint16_t num;
 } __attribute__((packed));
