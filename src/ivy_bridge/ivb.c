@@ -1,14 +1,14 @@
-#include "ivb.h"
-#include "../pci.h"
-#include <lil/intel.h>
-#include "../lvds.h"
-#include "../gmbus.h"
-#include "crtc.h"
-#include "interrupt.h"
-#include "plane.h"
-#include "gtt.h"
-
 #include <lil/imports.h>
+#include <lil/intel.h>
+
+#include "src/ivy_bridge/ivb.h"
+#include "src/ivy_bridge/crtc.h"
+#include "src/ivy_bridge/interrupt.h"
+#include "src/ivy_bridge/plane.h"
+#include "src/ivy_bridge/gtt.h"
+
+#include "src/pci.h"
+#include "src/lvds.h"
 
 #define PCI_MGGC0 0x50
 
