@@ -1,3 +1,5 @@
+#include <lil/imports.h>
+
 #include "edid.h"
 
 void edid_timing_to_mode(DisplayData* edid, DetailTiming timing, LilModeInfo* mode) {
@@ -25,4 +27,54 @@ void edid_timing_to_mode(DisplayData* edid, DetailTiming timing, LilModeInfo* mo
 		mode->bpc = 5;
 	else
 		mode->bpc = 4 + 2 * ((edid->inputParameters >> 4) & 0x7);
+
+	if(edid->structRevision >= 4 && (edid->inputParameters & 0x80) != 0) {
+		uint32_t edid_bpp_val = (edid->inputParameters >> 4) & 7;
+		uint32_t bpp = 0;
+
+		switch(edid_bpp_val) {
+			case 0: {
+				lil_panic("unhandled");
+			}
+			case 1:
+				bpp = 18;
+				break;
+			case 2:
+				bpp = 24;
+				break;
+			case 3:
+				bpp = 30;
+				break;
+			case 4:
+				bpp = 36;
+				break;
+			case 5:
+				bpp = 42;
+				break;
+			case 6:
+				bpp = 48;
+				break;
+		}
+
+		mode->bpp = bpp;
+	} else {
+		mode->bpp = 24;
+	}
+
+	mode->hsyncPolarity = 0;
+	mode->vsyncPolarity = 0;
+
+	if((timing.features & 0x10) && (timing.features & 8)) {
+		mode->hsyncPolarity = 1;
+		mode->vsyncPolarity = 1;
+
+		if(timing.features & 2)
+			mode->hsyncPolarity = 2;
+
+		if(timing.features & 4)
+			mode->vsyncPolarity = 2;
+	}
+
+	mode->horizontalMm = timing.dimensionHeight | ((timing.dimensionMsb & 0x0F) << 8);
+	mode->horizontalMm = timing.dimensionWidth | ((timing.dimensionMsb & 0xF0) << 4);
 }

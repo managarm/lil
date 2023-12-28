@@ -19,8 +19,9 @@ typedef enum LilConnectorType {
 } LilConnectorType;
 
 typedef struct LilModeInfo {
-    uint32_t clock;
-    int vactive;
+	/* pixel clock in KHz */
+	uint32_t clock;
+	int vactive;
 	int vsyncStart;
 	int vsyncEnd;
 	int vtotal;
@@ -28,7 +29,12 @@ typedef struct LilModeInfo {
 	int hsyncStart;
 	int hsyncEnd;
 	int htotal;
-    int bpc;
+	int bpc;
+	int bpp;
+	int hsyncPolarity;
+	int vsyncPolarity;
+	uint16_t horizontalMm;
+	uint16_t verticalMm;
 } LilModeInfo;
 
 /*
