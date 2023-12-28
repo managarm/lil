@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint32_t GpuAddr;
 struct LilGpu;
 
@@ -155,3 +159,7 @@ void lil_init_gpu(LilGpu* ret, void* pci_device);
 
 typedef struct LilIrqType {
 } LilIrqType;
+
+#ifdef __cplusplus
+}
+#endif

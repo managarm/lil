@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum LilLogType {
 	ERROR,
 	WARNING,
@@ -37,3 +41,7 @@ __attribute__((weak)) void* lil_map(size_t loc, size_t len);
 __attribute__((weak)) void lil_unmap(void *loc, size_t len);
 __attribute__((weak)) void lil_log(enum LilLogType type, const char *fmt, ...);
 __attribute__((weak, noreturn)) void lil_panic(const char* msg);
+
+#ifdef __cplusplus
+}
+#endif

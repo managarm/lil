@@ -7,6 +7,10 @@
 #include <lil/intel.h>
 #include <lil/vbt-types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Obtain a valid VBT header
  *
@@ -23,3 +27,6 @@ uint8_t vbt_dvo_to_ddi(uint8_t dvo_id);
 const char *vbt_dvo_get_name(uint8_t dvo);
 
 const struct vbt_header *vbt_locate(LilGpu *gpu);
+#ifdef __cplusplus
+}
+#endif
