@@ -1,5 +1,5 @@
-#include "lvds.h"
-#include "gmbus.h"
+#include "src/lvds.h"
+#include "src/gmbus.h"
 
 #include <lil/imports.h>
 
@@ -13,9 +13,9 @@ bool lil_lvds_is_connected (struct LilGpu* gpu, struct LilConnector* connector) 
 
 LilConnectorInfo lil_lvds_get_connector_info (struct LilGpu* gpu, struct LilConnector* connector) {
     (void)connector;
-    LilConnectorInfo ret = {0};
-    LilModeInfo* info = lil_malloc(sizeof(LilModeInfo) * 4);
-    ret.num_modes = lil_gmbus_get_mode_info(gpu, info, 0b11);
+    LilConnectorInfo ret = {};
+    auto info = reinterpret_cast<LilModeInfo *>(lil_malloc(sizeof(LilModeInfo) * 4));
+    ret.num_modes = lil_gmbus_get_mode_info(gpu, connector, info);
     ret.modes = info;
     return ret;
 }

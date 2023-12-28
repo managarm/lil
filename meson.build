@@ -14,10 +14,10 @@ add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unu
 add_project_arguments(['-Werror=incompatible-pointer-types'], language: ['c'])
 
 sources = files(
-    'src/edid.c',
-    'src/gmbus.c',
+    'src/edid.cpp',
+    'src/gmbus.cpp',
     'src/intel.c',
-    'src/lvds.c',
+    'src/lvds.cpp',
 
     'src/ivy_bridge/crtc.c',
     'src/ivy_bridge/gtt.c',
