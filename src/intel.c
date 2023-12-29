@@ -1,6 +1,5 @@
 #include <lil/intel.h>
 #include "ivy_bridge/ivb.h"
-#include "coffee_lake/cfl.h"
 
 #include <lil/imports.h>
 
@@ -22,13 +21,6 @@ void lil_init_gpu(LilGpu* ret, void* device) {
         case 0x0166 : {
             ret->gen = GEN_IVB;
             lil_init_ivb_gpu(ret, device);
-            break;
-        }
-
-        case 0x3E9B:
-        case 0x5917: {
-            ret->gen = GEN_CFL;
-            lil_init_cfl_gpu(ret, device);
             break;
         }
     }
