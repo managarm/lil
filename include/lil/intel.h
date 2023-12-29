@@ -83,6 +83,36 @@ typedef struct LilCrtc {
     void (*commit_modeset) (struct LilGpu* gpu, struct LilCrtc* crtc);
 } LilCrtc;
 
+typedef struct LilEncoderEdp {
+} LilEncoderEdp;
+
+typedef struct LilEncoderDp {
+	bool vbios_hotplug_support;
+	uint8_t ddc_pin;
+	uint8_t aux_ch;
+	uint8_t onboard_redriver_emph_vswing;
+	uint8_t dp_max_link_rate;
+	uint8_t dp_lane_count;
+	bool support_tps3_pattern;
+	bool support_enhanced_frame_caps;
+} LilEncoderDp;
+
+typedef struct LilEncoderHdmi {
+	uint8_t ddc_pin;
+	uint8_t aux_ch;
+	uint8_t iboost_level;
+	uint8_t hdmi_level_shift;
+	bool iboost;
+} LilEncoderHdmi;
+
+typedef struct LilEncoder {
+	union {
+		LilEncoderEdp edp;
+		LilEncoderDp dp;
+		LilEncoderHdmi hdmi;
+	};
+} LilEncoder;
+
 typedef struct LilConnectorInfo {
     uint32_t num_modes;
     LilModeInfo* modes;
@@ -114,6 +144,7 @@ typedef struct LilConnector {
     PllLilLimits limits;
 
     LilCrtc* crtc;
+	LilEncoder *encoder;
 
     bool on_pch;
 
