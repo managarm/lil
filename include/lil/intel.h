@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <lil/pch.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -176,6 +177,7 @@ typedef struct LilGpu {
     LilConnector* connectors;
 
     LilGpuGen gen;
+	enum LilPchGen pch_gen;
 
     uintptr_t gpio_start;
     uintptr_t mmio_start;
@@ -190,6 +192,7 @@ typedef struct LilGpu {
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
 
     void *dev;
+	uint16_t pch_dev;
 } LilGpu;
 
 /*

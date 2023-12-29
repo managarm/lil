@@ -18,6 +18,7 @@ sources = files(
     'src/gmbus.cpp',
     'src/intel.cpp',
     'src/lvds.cpp',
+    'src/pch.cpp',
 
     'src/ivy_bridge/crtc.c',
     'src/ivy_bridge/gtt.c',
