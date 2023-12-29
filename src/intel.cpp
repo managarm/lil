@@ -1,16 +1,17 @@
 #include <lil/intel.h>
-#include "ivy_bridge/ivb.h"
-
 #include <lil/imports.h>
 
-void lil_init_gpu(LilGpu* ret, void* device) {
-   uint32_t config_0 = lil_pci_readd(device, 0);
+#include "src/ivy_bridge/ivb.h"
+#include "src/pci.h"
+
+void lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
+   uint32_t config_0 = lil_pci_readd(device, PCI_HDR_VENDOR_ID);
     if (config_0 == 0xffffffff) {
         return;
     }
-    uint16_t device_id = (uint16_t)(config_0 >> 16);
-    uint16_t vendor_id = (uint16_t)config_0;
 
+    uint16_t device_id = (uint16_t) (config_0 >> 16);
+    uint16_t vendor_id = (uint16_t) config_0;
     if (vendor_id != 0x8086) {
         return;
     }
@@ -25,3 +26,4 @@ void lil_init_gpu(LilGpu* ret, void* device) {
         }
     }
 }
+

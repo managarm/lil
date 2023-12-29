@@ -202,7 +202,7 @@ typedef struct LilGpu {
  * - set the surface_address for the planes
  * - call commit_modeset
  */
-void lil_init_gpu(LilGpu* ret, void* pci_device);
+void lil_init_gpu(LilGpu* ret, void* pci_device, uint16_t pch_id);
 
 typedef struct LilIrqType {
 } LilIrqType;

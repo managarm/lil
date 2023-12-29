@@ -16,7 +16,7 @@ add_project_arguments(['-Werror=incompatible-pointer-types'], language: ['c'])
 sources = files(
     'src/edid.cpp',
     'src/gmbus.cpp',
-    'src/intel.c',
+    'src/intel.cpp',
     'src/lvds.cpp',
 
     'src/ivy_bridge/crtc.c',
