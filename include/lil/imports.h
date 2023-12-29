@@ -54,6 +54,11 @@ __attribute__((weak, nonnull(1))) void lil_unmap(void *loc, size_t len);
 __attribute__((format(printf, 2, 3), nonnull(2))) void lil_log(enum LilLogType type, const char *fmt, ...);
 __attribute__((noreturn, nonnull(1))) void lil_panic(const char* msg);
 
+#define lil_assert(x) if(!(x)) { \
+	lil_log(ERROR, "assertion '%s' failed (%s:%u)\n", #x, __FILE__, __LINE__); \
+	lil_panic("assertion failed"); \
+}
+
 __attribute__((weak)) const struct vbt_header *lil_vbt_locate(struct LilGpu *gpu);
 
 #ifdef __cplusplus
