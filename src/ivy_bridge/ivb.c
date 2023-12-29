@@ -67,7 +67,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->connectors[0].crtc->connector = &ret->connectors[0];
     ret->connectors[0].crtc->num_planes = 1;
     ret->connectors[0].crtc->planes = lil_malloc(sizeof(LilPlane));
-    for (int i = 0; i < ret->connectors[0].crtc->num_planes; i++) {
+    for (size_t i = 0; i < ret->connectors[0].crtc->num_planes; i++) {
         ret->connectors[0].crtc->planes[i].enabled = 0;
         ret->connectors[0].crtc->planes[i].pipe_id = 0;
         ret->connectors[0].crtc->planes[i].update_surface = lil_ivb_update_primary_surface;
