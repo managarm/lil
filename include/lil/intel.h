@@ -219,12 +219,16 @@ typedef struct LilGpu {
     uintptr_t vram;
     uintptr_t gtt_address;
     size_t gtt_size;
+	size_t stolen_memory_pages;
 
     void (*enable_display_interrupt) (struct LilGpu* gpu, uint32_t enable_mask);
     void (*process_interrupt) (struct LilGpu* gpu);
 
     void (*vmem_clear) (struct LilGpu* gpu);
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
+
+	/* reference clock frequency in MHz */
+	uint32_t ref_clock_freq;
 
 	bool vco_8640;
 	uint32_t cdclk_freq;
