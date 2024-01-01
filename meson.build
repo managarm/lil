@@ -14,6 +14,7 @@ add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unu
 add_project_arguments(['-Werror=incompatible-pointer-types'], language: ['c'])
 
 sources = files(
+    'src/avi.cpp',
     'src/edid.cpp',
     'src/gmbus.cpp',
     'src/intel.cpp',
