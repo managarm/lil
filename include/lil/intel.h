@@ -169,14 +169,29 @@ typedef enum LilInterruptEnableMask {
 
 typedef enum LilGpuGen {
     GEN_IVB = 7,
-    GEN_CFL = 9,
+    GEN_SKL = 9,
 } LilGpuGen;
+
+typedef enum LilGpuSubGen {
+	SUBGEN_NONE,
+	SUBGEN_GEMINI_LAKE, // Gen9LP
+	SUBGEN_KABY_LAKE, // Gen9p5
+	SUBGEN_COFFEE_LAKE,
+} LilGpuSubGen;
+
+typedef enum LilGpuVariant {
+	H,
+	ULT,
+	ULX,
+} LilGpuVariant;
 
 typedef struct LilGpu {
     uint32_t num_connectors;
     LilConnector* connectors;
 
     LilGpuGen gen;
+    LilGpuSubGen subgen;
+    LilGpuVariant variant;
 	enum LilPchGen pch_gen;
 
     uintptr_t gpio_start;

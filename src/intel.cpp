@@ -21,6 +21,7 @@ void lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
 	ret->pch_dev = pch_id;
 
 	pch::get_gen(ret);
+    ret->subgen = SUBGEN_NONE;
     switch (device_id) {
         case 0x0166 : {
             ret->gen = GEN_IVB;
