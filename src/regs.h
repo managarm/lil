@@ -9,6 +9,8 @@
 #define REG_PTR(r) ((volatile uint32_t *) (gpu->mmio_start + (r)))
 #define REG(r) (*REG_PTR(r))
 
+#define BLC_PWM_DATA 0x48254
+
 #define GMBUS0 0xC5100
 #define GMBUS1 0xC5104
 #define GMBUS2 0xC5108

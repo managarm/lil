@@ -26,6 +26,7 @@ sources = files(
     'src/ivy_bridge/ivb.c',
     'src/ivy_bridge/plane.c',
 
+    'src/kaby_lake/brightness.cpp',
     'src/kaby_lake/gtt.cpp',
     'src/kaby_lake/pci.cpp',
 
