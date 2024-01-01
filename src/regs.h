@@ -16,6 +16,12 @@
 #define GMBUS2 0xC5108
 #define GMBUS3 0xC510C
 
+#define GEN6_PCODE_MAILBOX 0x138124
+#define GEN6_PCODE_MAILBOX_READY (1 << 31)
+
+#define GEN6_PCODE_DATA 0x138128
+#define GEN6_PCODE_DATA1 0x13812C
+
 static inline bool wait_for_bit_set(volatile uint32_t *reg, uint32_t mask, size_t timeout_us, size_t step_us) {
 	if(timeout_us % step_us != 0) {
 		lil_panic("timeout is not a multiple of step!");

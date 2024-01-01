@@ -30,6 +30,7 @@ sources = files(
     'src/kaby_lake/brightness.cpp',
     'src/kaby_lake/gtt.cpp',
     'src/kaby_lake/pci.cpp',
+    'src/kaby_lake/pcode.cpp',
 
 	'src/vbt/parsing.cpp',
 	'src/vbt/vbt.cpp',
