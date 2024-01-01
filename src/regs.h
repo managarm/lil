@@ -9,6 +9,12 @@
 #define REG_PTR(r) ((volatile uint32_t *) (gpu->mmio_start + (r)))
 #define REG(r) (*REG_PTR(r))
 
+#define CDCLK_CTL 0x46000
+#define CDCLK_CTL_DECIMAL_MASK (0x7FF)
+#define CDCLK_CTL_DECIMAL(v) (v & CDCLK_CTL_DECIMAL_MASK)
+#define CDCLK_CTL_FREQ_SELECT_MASK (3 << 26)
+#define CDCLK_CTL_FREQ_SELECT(v) (((v) << 26) & CDCLK_CTL_FREQ_SELECT_MASK)
+
 #define BLC_PWM_DATA 0x48254
 
 #define DDI_AUX_CTL(c) (0x64010 + ((c) * 0x100))

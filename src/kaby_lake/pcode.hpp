@@ -5,6 +5,9 @@
 namespace kbl::pcode {
 
 enum class Mailbox : uint32_t {
+	SKL_CDCLK_CONTROL = 0x7,
+#define SKL_CDCLK_PREPARE_FOR_CHANGE 0x3
+#define SKL_CDCLK_READY_FOR_CHANGE 0x1
 };
 
 bool rw(LilGpu *gpu, uint32_t *data0, uint32_t *data1, Mailbox mbox, uint32_t *timeout);

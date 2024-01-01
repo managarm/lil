@@ -226,6 +226,9 @@ typedef struct LilGpu {
     void (*vmem_clear) (struct LilGpu* gpu);
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
 
+	bool vco_8640;
+	uint32_t cdclk_freq;
+
     void *dev;
 	uint16_t pch_dev;
 } LilGpu;
