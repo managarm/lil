@@ -12,6 +12,12 @@ extern "C" {
 typedef uint32_t GpuAddr;
 struct LilGpu;
 
+typedef enum LilError {
+	LIL_SUCCESS,
+	LIL_TIMEOUT,
+	LIL_INVALID_PLL,
+} LilError;
+
 typedef enum LilConnectorType {
     HDMI,
     LVDS,
@@ -139,6 +145,18 @@ typedef struct PllLilLimits {
     LilLimit p2;
 } PllLilLimits;
 
+enum LilAuxChannel {
+	AUX_CH_A,
+	AUX_CH_B,
+	AUX_CH_C,
+	AUX_CH_D,
+	AUX_CH_E,
+	AUX_CH_F,
+	AUX_CH_G,
+	AUX_CH_H,
+	AUX_CH_I,
+};
+
 typedef struct LilConnector {
     bool (*is_connected) (struct LilGpu* gpu, struct LilConnector* connector);
     LilConnectorInfo (*get_connector_info) (struct LilGpu* gpu, struct LilConnector* connector);
@@ -159,6 +177,8 @@ typedef struct LilConnector {
     //indicates whether vertical sync/blank is happening for this connector.
     bool vsync;
     bool vblank;
+
+	enum LilAuxChannel aux_ch;
 } LilConnector;
 
 typedef enum LilInterruptEnableMask {
