@@ -40,6 +40,7 @@ sources = files(
     'src/kaby_lake/pcode.cpp',
     'src/kaby_lake/pipe.cpp',
     'src/kaby_lake/plane.cpp',
+    'src/kaby_lake/pll.cpp',
     'src/kaby_lake/setup.cpp',
     'src/kaby_lake/transcoder.cpp',
     'src/kaby_lake/watermarks.cpp',
