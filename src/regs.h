@@ -170,6 +170,15 @@
 #define DDI_AUX_NATIVE_WRITE 0x8
 #define DDI_AUX_NATIVE_READ 0x9
 
+#define DP_TP_CTL(i) (0x64040 + ((i) * 0x100))
+#define DP_TP_CTL_ENABLE (1 << 31)
+#define DP_TP_CTL_ENHANCED_FRAMING_ENABLE (1 << 18)
+#define DP_TP_CTL_TRAIN_MASK (7 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN1 (0 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN2 (1 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN_IDLE (2 << 8)
+#define DP_TP_CTL_TRAIN_PATTERN_NORMAL (3 << 8);
+
 #define DDI_BUF_TRANS(i) (0x64E00 + (0x60 * i))
 
 #define PS_WIN_POS_1(pipe) (0x68170 + (0x800 * pipe))
