@@ -2,6 +2,7 @@
 #include <lil/intel.h>
 #include <stdint.h>
 
+#include "src/kaby_lake/hdmi.hpp"
 #include "src/kaby_lake/pcode.hpp"
 #include "src/kaby_lake/pll.hpp"
 #include "src/regs.h"
@@ -284,6 +285,10 @@ void dpll_ctrl_enable(LilGpu *gpu, LilCrtc *crtc, uint32_t link_rate) {
 
 	lil_log(VERBOSE, "setting DPLL_CTRL1 = %#010x\n", set_dpll_ctrl | dpll_ctrl_val);
 	REG(DPLL_CTRL1) = set_dpll_ctrl | dpll_ctrl_val;
+
+	if(crtc->connector->type == HDMI) {
+		kbl::hdmi::pll_enable_sequence(gpu, crtc);
+	}
 
 	if(crtc->connector->type == EDP) {
 		uint32_t data0 = 0;

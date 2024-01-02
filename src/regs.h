@@ -22,6 +22,13 @@
 #define CHICKEN_MISC2 0x42084
 #define CHICKEN_MISC2_KBL_ARB_FILL_SPARE_14 (1 << 14)
 #define CHICKEN_MISC2_KBL_ARB_FILL_SPARE_13 (1 << 13)
+#define CHICKEN_TRANS_A 0x420C0
+#define CHICKEN_TRANS_B 0x420C4
+#define CHICKEN_TRANS_C 0x420C8
+#define CHICKEN_TRANS_D 0x420D8
+#define CHICKEN_TRANS_EDP 0x420CC
+#define CHICKEN_TRANS_DDI_TRAINING_OVERRIDE_VALUE (1 << 18)
+#define CHICKEN_TRANS_DDI_TRAINING_OVERRIDE_ENABLE (1 << 19)
 
 #define ISR(i) (0x44400 + ((i) * 0x10))
 #define IMR(i) (0x44404 + ((i) * 0x10))
@@ -104,6 +111,11 @@
 #define TRANS_DATAN 0x34
 #define TRANS_LINKM 0x40
 #define TRANS_LINKN 0x44
+#define VIDEO_DIP_CTL 0x200
+#define VIDEO_DIP_CTL_ENABLE_AVI (1 << 12)
+
+#define VIDEO_DIP_AVI_DATA(idx) (0x220 + (4 * idx))
+
 #define TRANS_DDI_FUNC_CTL 0x400
 #define TRANS_DDI_FUNC_CTL_ENABLE (1 << 31)
 #define TRANS_DDI_FUNC_CTL_SELECT_DDI_MASK (0b111 << 28)
@@ -203,6 +215,9 @@
 #define DISPIO_CR_TX_BMU_CR0 0x6C00C
 #define DISPIO_CR_TX_BMU_CR0_DDI_BALANCE_LEG_MASK(ddi) (0b111 << (8 + ((ddi) * 3)))
 #define DISPIO_CR_TX_BMU_CR0_DDI_BALANCE_LEG(ddi, b) ((b) << (8 + ((ddi) * 3)))
+
+#define DPLL_CFGCR1(pll) (0x6C040 + ((pll - LCPLL2) * 8))
+#define DPLL_CFGCR2(pll) (0x6C044 + ((pll - LCPLL2) * 8))
 
 #define DPLL_CTRL1 0x6C058
 #define DPLL_CTRL1_LINK_RATE_MASK(i) (7 << ((i) * 6 + 1))

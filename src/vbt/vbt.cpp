@@ -5,6 +5,7 @@
 
 #include "src/debug.hpp"
 #include "src/kaby_lake/encoder.hpp"
+#include "src/kaby_lake/hdmi.hpp"
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/dp.hpp"
 #include "src/pci.h"
@@ -222,6 +223,79 @@ void vbt_setup_children(LilGpu *gpu) {
 				}
 
 				kbl::encoder::dp_init(gpu, con->encoder, dev);
+
+				con_id++;
+				break;
+			}
+
+			case DEVICE_TYPE_HDMI: {
+				LilConnector *con = &gpu->connectors[con_id];
+
+				con->id = vbt_handle_to_port(dev->handle);
+				con->type = HDMI;
+				con->ddi_id = vbt_dvo_to_ddi(dev->dvo_port);
+				con->aux_ch = vbt_parse_aux_channel(dev->aux_channel);
+
+				con->get_connector_info = kbl::hdmi::get_connector_info;
+				con->is_connected = kbl::hdmi::is_connected;
+
+				con->encoder = reinterpret_cast<LilEncoder *>(lil_malloc(sizeof(LilEncoder)));
+
+				con->crtc = reinterpret_cast<LilCrtc *>(lil_malloc(sizeof(LilCrtc)));
+				con->crtc->connector = con;
+
+				con->crtc->pipe_id = 1;
+				con->crtc->transcoder = static_cast<LilTranscoder>(con->crtc->pipe_id);
+				con->crtc->commit_modeset = kbl::hdmi::commit_modeset;
+				con->crtc->shutdown = kbl::hdmi::shutdown;
+
+				con->crtc->num_planes = 1;
+				con->crtc->planes = reinterpret_cast<LilPlane *>(lil_malloc(sizeof(LilPlane)));
+				for(size_t i = 0; i < con->crtc->num_planes; i++) {
+					con->crtc->planes[i].enabled = true;
+					con->crtc->planes[i].pipe_id = con->crtc->pipe_id;
+					con->crtc->planes[i].update_surface = kbl::plane::update_primary_surface;
+					con->crtc->planes[i].get_formats = kbl::plane::get_formats;
+				}
+
+				kbl::encoder::hdmi_init(gpu, con->encoder, dev);
+
+				con_id++;
+				break;
+			}
+
+			case DEVICE_TYPE_DP_DUAL_MODE: {
+				LilConnector *con = &gpu->connectors[con_id];
+
+				con->id = vbt_handle_to_port(dev->handle);
+				// TODO: don't hardcode this to HDMI
+				con->type = HDMI;
+				con->ddi_id = vbt_dvo_to_ddi(dev->dvo_port);
+				con->aux_ch = vbt_parse_aux_channel(dev->aux_channel);
+
+				con->get_connector_info = kbl::hdmi::get_connector_info;
+				con->is_connected = kbl::hdmi::is_connected;
+
+				con->encoder = reinterpret_cast<LilEncoder *>(lil_malloc(sizeof(LilEncoder)));
+
+				con->crtc = reinterpret_cast<LilCrtc *>(lil_malloc(sizeof(LilCrtc)));
+				con->crtc->connector = con;
+
+				con->crtc->pipe_id = 1;
+				con->crtc->transcoder = static_cast<LilTranscoder>(con->crtc->pipe_id);
+				con->crtc->commit_modeset = kbl::hdmi::commit_modeset;
+				con->crtc->shutdown = kbl::hdmi::shutdown;
+
+				con->crtc->num_planes = 1;
+				con->crtc->planes = reinterpret_cast<LilPlane *>(lil_malloc(sizeof(LilPlane)));
+				for(size_t i = 0; i < con->crtc->num_planes; i++) {
+					con->crtc->planes[i].enabled = true;
+					con->crtc->planes[i].pipe_id = con->crtc->pipe_id;
+					con->crtc->planes[i].update_surface = kbl::plane::update_primary_surface;
+					con->crtc->planes[i].get_formats = kbl::plane::get_formats;
+				}
+
+				kbl::encoder::hdmi_init(gpu, con->encoder, dev);
 
 				con_id++;
 				break;
