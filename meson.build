@@ -35,6 +35,7 @@ sources = files(
     'src/kaby_lake/dp-aux.cpp',
     'src/kaby_lake/encoder.cpp',
     'src/kaby_lake/gtt.cpp',
+    'src/kaby_lake/hpd.cpp',
     'src/kaby_lake/kbl.cpp',
     'src/kaby_lake/link-training.cpp',
     'src/kaby_lake/pci.cpp',
