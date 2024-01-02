@@ -16,6 +16,16 @@
 #define FUSE_STATUS_PG1 (1 << 26)
 #define FUSE_STATUS_PG2 (1 << 25)
 
+#define CHICKEN_PAR1_1 0x42080
+#define CHICKEN_PAR1_1_SKL_EDP_PSR_FIX_RDWRAP (1 << 3)
+#define CHICKEN_PAR1_1_KBL_ARB_FILL_SPARE_22 (1 << 22)
+#define CHICKEN_MISC2 0x42084
+#define CHICKEN_MISC2_KBL_ARB_FILL_SPARE_14 (1 << 14)
+#define CHICKEN_MISC2_KBL_ARB_FILL_SPARE_13 (1 << 13)
+
+#define DISP_ARB_CTL 0x45000
+#define DISP_ARB_CTL_FBC_MEMORY_WAKE (1 << 31)
+
 #define DBUF_CTL 0x45008
 #define DBUF_CTL_POWER_ENABLE (1 << 31)
 #define DBUF_CTL_POWER_STATE (1 << 30)
@@ -38,6 +48,12 @@
 #define LCPLL1_ENABLE (1u << 31)
 #define LCPLL1_LOCK (1 << 30)
 
+#define LCPLL2_CTL 0x46014
+#define LCPLL2_ENABLE (1u << 31)
+
+#define WRPLL_CTL1 0x46040
+#define WRPLL_CTL2 0x46060
+
 #define TRANS_CLK_SEL(i) (0x46140 + ((i) * 4))
 #define TRANS_CLK_SEL_CLOCK_MASK (0b111 << 29)
 #define TRANS_CLK_SEL_CLOCK_NONE (0b000 << 29)
@@ -48,7 +64,12 @@
 
 #define NDE_RSTWRN_OPT 0x46408
 
+#define GEN8_CHICKEN_DCPR_1	0x46430
+#define GEN8_CHICKEN_DCPR_1_MASK_WAKEMEM (1 << 13)
+
 #define BLC_PWM_DATA 0x48254
+
+#define SWF_6 0x4F018
 
 #define TRANSCODER_A_BASE 0x60000
 #define TRANSCODER_B_BASE 0x61000
@@ -157,6 +178,14 @@
 #define DPLL_CTRL1_PROGRAM_ENABLE(i) (1 << ((i) * 6))
 #define DPLL_CTRL1_SSC_ENABLE(i) (1 << ((i) * 6 + 4))
 #define DPLL_CTRL1_HDMI_MODE(i) (1 << ((i) * 6 + 5))
+
+#define DPLL_CTRL2 0x6C05C
+#define DPLL_CTRL2_DDI_CLK_OFF(port) (1 << ((port) + 15))
+#define DPLL_CTRL2_DDI_CLK_SEL_MASK(port) (3 << ((port) * 3 + 1))
+#define DPLL_CTRL2_DDI_CLK_SEL(clk, port) ((clk) << ((port) * 3 + 1))
+#define DPLL_CTRL2_DDI_SEL_OVERRIDE(port) (1 << ((port) << 3))
+#define DPLL_CTRL2_DDI_CLOCK_SELECT_SHIFT(i) (3 * (i) + 1)
+#define DPLL_CTRL2_DDI_CLOCK_SELECT_MASK(i) (3 << DPLL_CTRL2_DDI_CLOCK_SELECT_SHIFT(i))
 
 #define DPLL_STATUS 0x6C060
 #define DPLL_STATUS_LOCK(i) (1 << ((i) * 8))

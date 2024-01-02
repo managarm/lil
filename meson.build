@@ -31,6 +31,7 @@ sources = files(
     'src/kaby_lake/cdclk.cpp',
     'src/kaby_lake/dp-aux.cpp',
     'src/kaby_lake/gtt.cpp',
+    'src/kaby_lake/kbl.cpp',
     'src/kaby_lake/pci.cpp',
     'src/kaby_lake/pcode.cpp',
     'src/kaby_lake/pipe.cpp',

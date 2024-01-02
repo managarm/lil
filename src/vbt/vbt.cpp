@@ -74,5 +74,26 @@ const struct vbt_header *lil_vbt_locate(LilGpu *gpu) {
 }
 
 void vbt_init(LilGpu *gpu) {
+	gpu->vbt_header = lil_vbt_locate(gpu);
+	lil_log(VERBOSE, "lil: gpu->vbt_header addr 0x%lx\n", (uintptr_t) gpu->vbt_header);
+
+	const struct bdb_header *bdb_hdr = vbt_get_bdb_header(gpu->vbt_header);
+	if(!bdb_hdr)
+		lil_panic("BDB header not found");
+
+	auto driver_features_block = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header, BDB_DRIVER_FEATURES);
+	if(!driver_features_block)
+		lil_panic("BDB driver features not found");
+
+	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	if(!general_defs)
+		lil_panic("BDB general definitions not found");
 }
 
+void vbt_setup_children(LilGpu *gpu) {
+	size_t con_id = 0;
+
+	const struct bdb_driver_features *driver_features = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header, BDB_DRIVER_FEATURES);
+	const struct bdb_general_definitions *general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	gpu->num_connectors = con_id;
+}

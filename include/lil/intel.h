@@ -80,6 +80,14 @@ typedef enum LilTranscoder {
     INVALID_TRANSCODER,
 } LilTranscoder;
 
+typedef enum LilPllId {
+	INVALID_PLL = 0,
+	LCPLL1 = 1,
+	LCPLL2 = 2,
+	WRPLL1 = 3,
+	WRPLL2 = 4,
+} LilPllId;
+
 typedef struct LilCrtc {
     LilModeInfo current_mode;
     struct LilConnector* connector;
@@ -93,6 +101,8 @@ typedef struct LilCrtc {
 
     void (*shutdown) (struct LilGpu* gpu, struct LilCrtc* crtc);
     void (*commit_modeset) (struct LilGpu* gpu, struct LilCrtc* crtc);
+
+	LilPllId pll_id;
 } LilCrtc;
 
 typedef struct LilEncoderEdp {
@@ -206,6 +216,7 @@ typedef enum LilGpuVariant {
 } LilGpuVariant;
 
 typedef struct LilGpu {
+    uint32_t max_connectors;
     uint32_t num_connectors;
     LilConnector* connectors;
 
@@ -227,10 +238,16 @@ typedef struct LilGpu {
     void (*vmem_clear) (struct LilGpu* gpu);
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
 
+	const struct vbt_header *vbt_header;
+
 	/* reference clock frequency in MHz */
 	uint32_t ref_clock_freq;
 
+	uint32_t mem_latency_first_set;
+	uint32_t mem_latency_second_set;
+
 	bool vco_8640;
+	uint32_t boot_cdclk_freq;
 	uint32_t cdclk_freq;
 
     void *dev;
