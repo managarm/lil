@@ -50,6 +50,8 @@
 #define SRD_CTL 0x800
 #define SRD_STATUS 0x840
 
+#define PIPE_SRCSZ(pipe) (0x6001C + ((pipe) * 0x1000))
+
 #define DDI_BUF_CTL(i) (0x64000 + ((i) * 0x100))
 #define DDI_BUF_CTL_ENABLE (1 << 31)
 #define DDI_BUF_CTL_PORT_REVERSAL (1 << 16)
@@ -80,6 +82,15 @@
 #define DDI_AUX_NATIVE_WRITE 0x8
 #define DDI_AUX_NATIVE_READ 0x9
 
+#define PS_WIN_POS_1(pipe) (0x68170 + (0x800 * pipe))
+#define PS_WIN_POS_2(pipe) (0x68270 + (0x800 * pipe))
+
+#define PS_CTRL_1(i) (0x68180 + (0x800 * i))
+#define PS_CTRL_2(i) (0x68280 + (0x800 * i))
+
+#define PS_WIN_SZ_1(i) (0x68174 + (0x800 * i))
+#define PS_WIN_SZ_2(i) (0x68274 + (0x800 * i))
+
 #define DPLL_CTRL1 0x6C058
 #define DPLL_CTRL1_LINK_RATE_MASK(i) (7 << ((i) * 6 + 1))
 #define DPLL_CTRL1_LINK_RATE(i, v) ((v) << ((i) * 6 + 1))
@@ -95,6 +106,19 @@
 
 #define DPLL_STATUS 0x6C060
 #define DPLL_STATUS_LOCK(i) (1 << ((i) * 8))
+
+#define PIPE_MISC(i) (0x70030 + (0x1000 * i))
+#define PIPE_MISC_DITHERING_BPC_MASK (0b111 << 5)
+#define PIPE_MISC_DITHERING_6_BPC (0b010 << 5)
+#define PIPE_MISC_DITHERING_8_BPC (0b000 << 5)
+#define PIPE_MISC_DITHERING_10_BPC (0b001 << 5)
+#define PIPE_MISC_DITHERING_12_BPC (0b100 << 5)
+#define PIPE_MISC_DITHERING_ENABLE (1 << 4)
+#define PIPE_MISC_DITHERING_TYPE_MASK (0b11 << 2)
+#define PIPE_MISC_DITHERING_TYPE_SPATIAL (0b00 << 2)
+#define PIPE_MISC_DITHERING_TYPE_ST1 (0b01 << 2)
+#define PIPE_MISC_DITHERING_TYPE_ST2 (0b10 << 2)
+#define PIPE_MISC_DITHERING_TYPE_TEMPORAL (0b11 << 2)
 
 #define SFUSE_STRAP 0xC2014
 
