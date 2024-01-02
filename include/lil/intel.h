@@ -108,6 +108,8 @@ typedef struct LilCrtc {
 } LilCrtc;
 
 typedef struct LilEncoderEdp {
+	bool edp_iboost;
+	uint8_t edp_balance_leg_val;
 } LilEncoderEdp;
 
 typedef struct LilEncoderDp {

@@ -30,6 +30,7 @@ sources = files(
     'src/kaby_lake/brightness.cpp',
     'src/kaby_lake/cdclk.cpp',
     'src/kaby_lake/ddi-translations.cpp',
+    'src/kaby_lake/ddi.cpp',
     'src/kaby_lake/dp-aux.cpp',
     'src/kaby_lake/gtt.cpp',
     'src/kaby_lake/kbl.cpp',

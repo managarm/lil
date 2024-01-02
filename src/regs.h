@@ -163,6 +163,8 @@
 #define DDI_AUX_NATIVE_WRITE 0x8
 #define DDI_AUX_NATIVE_READ 0x9
 
+#define DDI_BUF_TRANS(i) (0x64E00 + (0x60 * i))
+
 #define PS_WIN_POS_1(pipe) (0x68170 + (0x800 * pipe))
 #define PS_WIN_POS_2(pipe) (0x68270 + (0x800 * pipe))
 
@@ -171,6 +173,10 @@
 
 #define PS_WIN_SZ_1(i) (0x68174 + (0x800 * i))
 #define PS_WIN_SZ_2(i) (0x68274 + (0x800 * i))
+
+#define DISPIO_CR_TX_BMU_CR0 0x6C00C
+#define DISPIO_CR_TX_BMU_CR0_DDI_BALANCE_LEG_MASK(ddi) (0b111 << (8 + ((ddi) * 3)))
+#define DISPIO_CR_TX_BMU_CR0_DDI_BALANCE_LEG(ddi, b) ((b) << (8 + ((ddi) * 3)))
 
 #define DPLL_CTRL1 0x6C058
 #define DPLL_CTRL1_LINK_RATE_MASK(i) (7 << ((i) * 6 + 1))
@@ -234,6 +240,10 @@
 
 #define SOUTH_DSPCLK_GATE_D 0xC2020
 #define SOUTH_DSPCLK_GATE_D_PCH_LP_PARTITION_LEVEL_DISABLE 0x1000
+
+#define SDEISR 0xC4000
+#define SDEIMR 0xC4004
+#define SDEIER 0xC400C
 
 #define SHOTPLUG_CTL 0xC4030
 
