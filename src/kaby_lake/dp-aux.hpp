@@ -16,4 +16,6 @@ LilError i2c_write(struct LilGpu* gpu, LilConnector *con,  uint16_t addr, uint8_
 
 void read_edid(struct LilGpu* gpu, LilConnector *con, DisplayData* buf);
 
+bool dual_mode_read(LilGpu *gpu, LilConnector *con, uint8_t offset, void *buffer, size_t size);
+
 }

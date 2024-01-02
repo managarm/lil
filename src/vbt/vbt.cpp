@@ -97,6 +97,23 @@ void vbt_init(LilGpu *gpu) {
 
 namespace {
 
+uint32_t vbt_handle_to_port(uint32_t handle) {
+	switch(handle) {
+		case 4:
+			return 0;
+		case 0x10:
+			return 3;
+		case 0x20:
+			return 2;
+		case 0x40:
+			return 1;
+		default: {
+			lil_log(ERROR, "unexpected VBT child handle %#x\n", handle);
+			lil_panic("unhandled VBT child handle");
+		}
+	}
+}
+
 enum LilAuxChannel vbt_parse_aux_channel(uint8_t aux_ch) {
 	switch(aux_ch) {
 		case 0x40: return AUX_CH_A;
@@ -160,6 +177,60 @@ void vbt_setup_children(LilGpu *gpu) {
 		kbl::encoder::edp_init(gpu, con->encoder);
 
 		con_id++;
+	}
+
+	size_t children = (general_defs->header.size - sizeof(*general_defs) + sizeof(struct bdb_block_header)) / general_defs->child_dev_size;
+
+	for(size_t child = con_id; child < children; child++) {
+		auto dev = reinterpret_cast<struct child_device *>(uintptr_t(&general_defs->child_dev) + (child * general_defs->child_dev_size));
+		uint32_t device_type = dev->device_type;
+
+		switch(device_type) {
+			case 0: {
+				continue;
+			}
+			case DEVICE_TYPE_DP: {
+				LilConnector *con = &gpu->connectors[con_id];
+
+				con->id = vbt_handle_to_port(dev->handle);
+				con->type = DISPLAYPORT;
+				con->ddi_id = vbt_dvo_to_ddi(dev->dvo_port);
+				con->aux_ch = vbt_parse_aux_channel(dev->aux_channel);
+
+				con->get_connector_info = kbl::dp::get_connector_info;
+				con->is_connected = kbl::dp::is_connected;
+
+				con->encoder = reinterpret_cast<LilEncoder *>(lil_malloc(sizeof(LilEncoder)));
+
+				con->crtc = reinterpret_cast<LilCrtc *>(lil_malloc(sizeof(LilCrtc)));
+				con->crtc->connector = con;
+
+				// TODO(CLEAN):	not optimal
+				// 				on gemini lake this seems to always be 0
+				con->crtc->pipe_id = 0;
+				con->crtc->transcoder = static_cast<LilTranscoder>(con->crtc->pipe_id);
+				con->crtc->commit_modeset = kbl::dp::commit_modeset;
+				con->crtc->shutdown = kbl::dp::crtc_shutdown;
+
+				con->crtc->num_planes = 1;
+				con->crtc->planes = reinterpret_cast<LilPlane *>(lil_malloc(sizeof(LilPlane)));
+				for(size_t i = 0; i < con->crtc->num_planes; i++) {
+					con->crtc->planes[i].enabled = true;
+					con->crtc->planes[i].pipe_id = con->crtc->pipe_id;
+					con->crtc->planes[i].update_surface = kbl::plane::update_primary_surface;
+					con->crtc->planes[i].get_formats = kbl::plane::get_formats;
+				}
+
+				kbl::encoder::dp_init(gpu, con->encoder, dev);
+
+				con_id++;
+				break;
+			}
+			default: {
+				lil_log(WARNING, "VBT: found unknown device type %#x\n", device_type);
+				break;
+			}
+		}
 	}
 
 	gpu->num_connectors = con_id;

@@ -5,6 +5,7 @@
 
 #include "src/debug.hpp"
 #include "src/kaby_lake/cdclk.hpp"
+#include "src/kaby_lake/dp.hpp"
 #include "src/kaby_lake/edp.hpp"
 #include "src/kaby_lake/kbl.hpp"
 #include "src/kaby_lake/gtt.hpp"
@@ -182,6 +183,15 @@ void init_gpu(LilGpu* gpu) {
 			case EDP: {
 				if(!kbl::edp::pre_enable(gpu, &gpu->connectors[i]))
 					lil_panic("eDP pre-enable failed");
+				else if(restrictMultipleOutputs) {
+					gpu->num_connectors = 1;
+					gpu->connectors = &gpu->connectors[i];
+				}
+				break;
+			}
+			case DISPLAYPORT: {
+				if(!kbl::dp::pre_enable(gpu, &gpu->connectors[i]))
+					lil_log(INFO, "DP pre-enable for connector %lu failed\n", i);
 				else if(restrictMultipleOutputs) {
 					gpu->num_connectors = 1;
 					gpu->connectors = &gpu->connectors[i];

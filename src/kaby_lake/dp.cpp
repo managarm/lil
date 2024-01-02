@@ -18,6 +18,68 @@
 
 namespace {
 
+bool ddi_in_use_by_hdport(LilGpu *gpu, enum LilDdiId ddi_id) {
+	uint32_t val = REG(HDPORT_STATE);
+
+	if((val & HDPORT_STATE_ENABLED) == 0) {
+		return false;
+	}
+
+	uint32_t mask = 0;
+
+	switch(ddi_id) {
+		case DDI_A:
+		case DDI_E:
+			return false;
+		case DDI_B:
+			mask = (1 << 3);
+			break;
+		case DDI_C:
+			mask = (1 << 5);
+			break;
+		case DDI_D:
+			mask = (1 << 7);
+			break;
+	}
+
+	return (val & mask);
+}
+
+bool hdmi_id_present_on_ddc(LilGpu *gpu, LilCrtc *crtc) {
+	if(!crtc->connector->encoder->dp.aux_ch)
+		return false;
+
+	LilConnector *con = crtc->connector;
+
+	uint8_t val = 0;
+	if(!kbl::dp::aux::dual_mode_read(gpu, con, 0x10, &val, 1))
+		return false;
+
+	lil_log(VERBOSE, "HDMI ID read = %#x\n", val);
+
+	return (val & 0xF8) == 0xA8;
+}
+
+bool unknown_init(LilGpu *gpu, LilCrtc *crtc) {
+	LilEncoder *enc = crtc->connector->encoder;
+
+	uint8_t data = 0;
+
+	if(!kbl::dp::aux::dual_mode_read(gpu, crtc->connector, 0x41, &data, 1))
+		return false;
+
+	if((data & 1))
+		return true;
+
+	if(!kbl::dp::aux::dual_mode_read(gpu, crtc->connector, 0x40, &data, 1))
+		return false;
+
+	/* TODO: rest of this function (sub_5DE8) */
+	lil_panic("TODO: unimplemented");
+
+	return false;
+}
+
 uint8_t dp_link_rate_for_crtc(LilGpu *gpu, struct LilCrtc* crtc) {
 	uint8_t last_valid_index = 0;
 	uint32_t link_rate = 0;
@@ -47,6 +109,76 @@ void enable_vblank(LilGpu *gpu, LilCrtc *crtc) {
 } // namespace
 
 namespace kbl::dp {
+
+bool pre_enable(LilGpu *gpu, LilConnector *con) {
+	LilEncoder *enc = con->encoder;
+
+	if((gpu->variant == ULT || gpu->variant == ULX) && (con->ddi_id == DDI_D || con->ddi_id == DDI_E)) {
+		lil_panic("unsupported DP configuration");
+	}
+
+	if(ddi_in_use_by_hdport(gpu, con->ddi_id)) {
+		lil_log(ERROR, "kbl_dp_pre_enable: failing because ddi_in_use_by_hdport\n");
+		return false;
+	}
+
+	if(!kbl::ddi::buf_enabled(gpu, con->crtc)) {
+		kbl::hpd::enable(gpu, con->crtc);
+
+		// Gemini Lake and Broxton do not have SFUSE_STRAP.
+		if(gpu->subgen != SUBGEN_GEMINI_LAKE) {
+			uint32_t sfuse_strap_mask = 0;
+			switch(con->ddi_id) {
+				case DDI_B: {
+					sfuse_strap_mask = 4;
+					break;
+				}
+				case DDI_C: {
+					sfuse_strap_mask = 2;
+					break;
+				}
+				case DDI_D: {
+					sfuse_strap_mask = 1;
+					break;
+				}
+				case DDI_A:
+				case DDI_E:
+					break;
+			}
+
+			if(sfuse_strap_mask && (REG(SFUSE_STRAP) & sfuse_strap_mask) == 0) {
+				lil_log(ERROR, "kbl_dp_pre_enable: failing because sfuse_strap_mask && (REG(SFUSE_STRAP) & sfuse_strap_mask) == 0\n");
+				return false;
+			}
+		}
+
+		bool init = false; // TODO: implement unknown_init(gpu, con->crtc);
+
+		bool hdmi_id_present = hdmi_id_present_on_ddc(gpu, con->crtc);
+		lil_log(DEBUG, "kbl_dp_pre_enable: init=%s, hdmi_id_present=%s\n", init ? "true" : "false", hdmi_id_present ? "true" : "false");
+
+		if(!hdmi_id_present || init) {
+			kbl::dp::aux::native_write(gpu, con, SET_POWER, 1);
+			uint8_t rev = kbl::dp::aux::native_read(gpu, con, DPCD_REV);
+
+			lil_log(INFO, "DPCD rev %x\n", rev);
+		}
+	}
+
+	// Read various display port parameters
+	enc->dp.dp_max_link_rate = kbl::dp::aux::native_read(gpu, con, MAX_LINK_RATE);
+	uint8_t raw_max_lane_count = kbl::dp::aux::native_read(gpu, con, MAX_LANE_COUNT);
+	enc->dp.dp_lane_count = raw_max_lane_count & MAX_LANE_COUNT_MASK;
+	enc->dp.support_tps3_pattern = raw_max_lane_count & MAX_LANE_COUNT_TPS3_SUPPORTED;
+	enc->dp.support_enhanced_frame_caps = raw_max_lane_count & MAX_LANE_COUNT_ENHANCED_FRAME_CAP;
+	lil_log(VERBOSE, "DPCD Info:\n");
+	lil_log(VERBOSE, "\tmax_link_rate: %i\n", enc->dp.dp_max_link_rate);
+	lil_log(VERBOSE, "\tlane_count: %i\n", enc->dp.dp_lane_count);
+	lil_log(VERBOSE, "\tsupport_tps3_pattern: %s\n", enc->dp.support_tps3_pattern ? "yes" : "no");
+	lil_log(VERBOSE, "\tsupport_enhanced_frame_caps: %s\n", enc->dp.support_enhanced_frame_caps ? "yes" : "no");
+
+	return true;
+}
 
 bool is_connected(struct LilGpu* gpu, struct LilConnector* connector) {
 	// TODO(): not reliable, only valid on chip startup, also wrong on some generations for some reason

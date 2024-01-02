@@ -311,4 +311,13 @@ void read_edid(struct LilGpu* gpu, LilConnector *con, DisplayData* buf) {
 	i2c_read(gpu, con, DDC_ADDR, EDID_SIZE, (uint8_t*)buf);
 }
 
+#define DP_DUAL_MODE_ADDR 0x40
+
+bool dual_mode_read(LilGpu *gpu, LilConnector *con, uint8_t offset, void *buffer, size_t size) {
+	if(gmbus_read(gpu, con, DP_DUAL_MODE_ADDR, offset, size, (uint8_t*)(buffer)) != LilError::LIL_SUCCESS)
+		return false;
+
+	return true;
+}
+
 } // namespace kbl::dp::aux
