@@ -34,6 +34,13 @@
 #define DBUF_CTL_POWER_ENABLE (1 << 31)
 #define DBUF_CTL_POWER_STATE (1 << 30)
 
+#define HDPORT_STATE 0x45050
+#define HDPORT_STATE_ENABLED (1 << 0)
+#define HDPORT_STATE_DPLL0_USED (1 << 12)
+#define HDPORT_STATE_DPLL1_USED (1 << 13)
+#define HDPORT_STATE_DPLL2_USED (1 << 15)
+#define HDPORT_STATE_DPLL3_USED (1 << 14)
+
 #define WM_LINETIME(i) (0x45270 + ((i) * 4))
 
 #define HSW_PWR_WELL_CTL1 0x45400
