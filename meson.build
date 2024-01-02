@@ -35,6 +35,7 @@ sources = files(
     'src/kaby_lake/pcode.cpp',
     'src/kaby_lake/pipe.cpp',
     'src/kaby_lake/setup.cpp',
+    'src/kaby_lake/transcoder.cpp',
 
 	'src/vbt/parsing.cpp',
 	'src/vbt/vbt.cpp',

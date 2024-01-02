@@ -76,9 +76,8 @@ typedef enum LilTranscoder {
     TRANSCODER_A,
     TRANSCODER_B,
     TRANSCODER_C,
-    TRANSCODER_D,
-
     TRANSCODER_EDP,
+    INVALID_TRANSCODER,
 } LilTranscoder;
 
 typedef struct LilCrtc {
@@ -178,6 +177,7 @@ typedef struct LilConnector {
     bool vsync;
     bool vblank;
 
+	enum LilDdiId ddi_id;
 	enum LilAuxChannel aux_ch;
 } LilConnector;
 
@@ -249,8 +249,6 @@ typedef struct LilGpu {
  */
 void lil_init_gpu(LilGpu* ret, void* pci_device, uint16_t pch_id);
 
-typedef struct LilIrqType {
-} LilIrqType;
 
 #ifdef __cplusplus
 }
