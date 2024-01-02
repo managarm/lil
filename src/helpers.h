@@ -17,3 +17,7 @@ static inline uint32_t div_u64(uint64_t a, uint32_t b) {
 
 	return lo;
 }
+
+static inline uint32_t div_u32_ceil(uint32_t a, uint32_t b) {
+	return a / b + (a % b > 0);
+}

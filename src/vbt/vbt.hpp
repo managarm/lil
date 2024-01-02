@@ -33,3 +33,6 @@ const T *vbt_get_bdb_block(const struct vbt_header *hdr, enum bdb_block_id id) {
 
 void vbt_init(LilGpu *gpu);
 void vbt_setup_children(LilGpu *gpu);
+
+LilDdiId vbt_dvo_to_ddi(uint8_t dvo_id);
+const char *vbt_dvo_get_name(uint8_t dvo);

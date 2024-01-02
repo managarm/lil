@@ -1,7 +1,12 @@
 #include <lil/intel.h>
 #include <lil/imports.h>
 #include <lil/vbt.h>
+#include <lil/vbt-types.h>
 
+#include "src/debug.hpp"
+#include "src/kaby_lake/encoder.hpp"
+#include "src/kaby_lake/plane.hpp"
+#include "src/kaby_lake/dp.hpp"
 #include "src/pci.h"
 #include "src/vbt/opregion.hpp"
 #include "src/vbt/vbt.hpp"
@@ -90,10 +95,72 @@ void vbt_init(LilGpu *gpu) {
 		lil_panic("BDB general definitions not found");
 }
 
+namespace {
+
+enum LilAuxChannel vbt_parse_aux_channel(uint8_t aux_ch) {
+	switch(aux_ch) {
+		case 0x40: return AUX_CH_A;
+		case 0x10: return AUX_CH_B;
+		case 0x20: return AUX_CH_C;
+		case 0x30: return AUX_CH_D;
+		case 0x50: return AUX_CH_E;
+		case 0x60: return AUX_CH_F;
+		case 0x70: return AUX_CH_G;
+		case 0x80: return AUX_CH_H;
+		case 0x90: return AUX_CH_I;
+		default: {
+			lil_log(WARNING, "Unhandled VBT child AUX channel %#x; falling back to AUX channel A\n", aux_ch);
+			return AUX_CH_A;
+		}
+	}
+}
+
+} // namespace
+
 void vbt_setup_children(LilGpu *gpu) {
 	size_t con_id = 0;
 
 	const struct bdb_driver_features *driver_features = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header, BDB_DRIVER_FEATURES);
 	const struct bdb_general_definitions *general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+
+	if(driver_features->lvds_config != LVDS_CONFIG_NONE && !skipEmbeddedDisplayPort) {
+		auto dev = reinterpret_cast<const child_device *>(&general_defs->child_dev);
+		LilConnector *con = &gpu->connectors[0];
+
+		lil_assert((dev->device_type & (DEVICE_TYPE_DISPLAYPORT_OUTPUT | DEVICE_TYPE_INTERNAL_CONNECTOR)));
+
+		con->id = 0;
+		con->type = EDP;
+		con->on_pch = true;
+		con->ddi_id = vbt_dvo_to_ddi(dev->dvo_port);
+		lil_assert(con->ddi_id == 0 || con->ddi_id == 3);
+		con->aux_ch = vbt_parse_aux_channel(dev->aux_channel);
+
+		con->get_connector_info = kbl::dp::get_connector_info;
+		con->is_connected = kbl::dp::is_connected;
+
+		con->encoder = reinterpret_cast<LilEncoder *>(lil_malloc(sizeof(LilEncoder)));
+
+		con->crtc = reinterpret_cast<LilCrtc *>(lil_malloc(sizeof(LilCrtc)));
+		con->crtc->transcoder = (con->ddi_id == DDI_A) ? TRANSCODER_EDP : TRANSCODER_A;
+		con->crtc->connector = &gpu->connectors[0];
+		con->crtc->pipe_id = 0;
+		con->crtc->commit_modeset = kbl::dp::commit_modeset;
+		con->crtc->shutdown = kbl::dp::crtc_shutdown;
+
+		con->crtc->num_planes = 1;
+		con->crtc->planes = reinterpret_cast<LilPlane *>(lil_malloc(sizeof(LilPlane)));
+		for(size_t i = 0; i < con->crtc->num_planes; i++) {
+			con->crtc->planes[i].enabled = 0;
+			con->crtc->planes[i].pipe_id = con->crtc->pipe_id;
+			con->crtc->planes[i].update_surface = kbl::plane::update_primary_surface;
+			con->crtc->planes[i].get_formats = kbl::plane::get_formats;
+		}
+
+		kbl::encoder::edp_init(gpu, con->encoder);
+
+		con_id++;
+	}
+
 	gpu->num_connectors = con_id;
 }
