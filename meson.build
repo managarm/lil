@@ -35,8 +35,10 @@ sources = files(
     'src/kaby_lake/pci.cpp',
     'src/kaby_lake/pcode.cpp',
     'src/kaby_lake/pipe.cpp',
+    'src/kaby_lake/plane.cpp',
     'src/kaby_lake/setup.cpp',
     'src/kaby_lake/transcoder.cpp',
+    'src/kaby_lake/watermarks.cpp',
 
 	'src/vbt/parsing.cpp',
 	'src/vbt/vbt.cpp',

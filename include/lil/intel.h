@@ -66,8 +66,10 @@ typedef struct LilPlane {
     GpuAddr surface_address;
     bool enabled;
     uint32_t pipe_id;
+	uint32_t pixel_format;
 
     bool (*update_surface) (struct LilGpu* gpu, struct LilPlane* plane, GpuAddr surface_address, GpuAddr line_stride);
+    uint32_t *(*get_formats) (struct LilGpu* gpu, size_t *num);
 } LilPlane;
 
 struct LilConnector;

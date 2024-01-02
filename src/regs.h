@@ -23,12 +23,18 @@
 #define CHICKEN_MISC2_KBL_ARB_FILL_SPARE_14 (1 << 14)
 #define CHICKEN_MISC2_KBL_ARB_FILL_SPARE_13 (1 << 13)
 
+#define ISR(i) (0x44400 + ((i) * 0x10))
+#define IMR(i) (0x44404 + ((i) * 0x10))
+#define IIR(i) (0x44408 + ((i) * 0x10))
+
 #define DISP_ARB_CTL 0x45000
 #define DISP_ARB_CTL_FBC_MEMORY_WAKE (1 << 31)
 
 #define DBUF_CTL 0x45008
 #define DBUF_CTL_POWER_ENABLE (1 << 31)
 #define DBUF_CTL_POWER_STATE (1 << 30)
+
+#define WM_LINETIME(i) (0x45270 + ((i) * 4))
 
 #define HSW_PWR_WELL_CTL1 0x45400
 #define HSW_PWR_WELL_CTL1_POWER_WELL_2_REQUEST (1 << 31)
@@ -202,6 +208,24 @@
 #define PIPE_MISC_DITHERING_TYPE_ST1 (0b01 << 2)
 #define PIPE_MISC_DITHERING_TYPE_ST2 (0b10 << 2)
 #define PIPE_MISC_DITHERING_TYPE_TEMPORAL (0b11 << 2)
+
+#define PLANE_CTL(i) (0x70180 + (0x1000 * i))
+#define PLANE_CTL_ENABLE (1 << 31)
+#define PLANE_CTL_GAMMA_ENABLE (1 << 30)
+#define PLANE_CTL_SOURCE_PIXEL_FORMAT_RGB_8_8_8_8 (0b0100 << 24)
+#define PLANE_CTL_SOURCE_PIXEL_FORMAT_RGB_5_6_5 (0b1110 << 24)
+#define PLANE_CTL_COLOR_ORDER_BGRX (0 << 20)
+#define PLANE_CTL_COLOR_ORDER_RGBX (1 << 20)
+#define PLANE_CTL_INTERNAL_GAMMA_DISABLE (1 << 13)
+
+#define DSP_ADDR(i) (0x70184 + (0x1000 * i))
+#define PRI_STRIDE(i) (0x70188 + (0x1000 * i))
+#define PLANE_POS(i) (0x7018C + (0x1000 * i))
+#define PLANE_SIZE(i) (0x70190 + (0x1000 * i))
+#define PRI_SURFACE(i) (0x7019C + (0x1000 * i))
+#define PLANE_WM(pipe_id, index) (0x70240 + (0x1000 * (pipe_id)) + (4 * (index)))
+#define PLANE_WM_1(i) (0x70240 + (0x1000 * i))
+#define PLANE_BUG_CFG_1(i) (0x7027C + (0x1000 * i))
 
 #define PLANE_BUF_CFG_1_A 0x7027C
 #define PLANE_BUF_CFG_1_B 0x7127C
