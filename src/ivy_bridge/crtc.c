@@ -1,8 +1,7 @@
-#include "crtc.h"
+#include <stdbool.h>
 
 #include <lil/imports.h>
-
-#include <stdbool.h>
+#include "src/ivy_bridge/crtc.h"
 
 #define  BLC_PWM_CTL 0x48250
 #define  BLM_PWM_ENABLE (1u << 31)
