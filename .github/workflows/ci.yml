@@ -5,22 +5,29 @@ on: [push, pull_request]
 jobs:
     build-lil:
         name: Build lil
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         steps:
           - name: Install prerequisites
             run: |
                 set -x
                 sudo apt-get update
-                sudo apt-get install meson
+                sudo apt-get install gcc-13 ninja-build
+                pip3 install meson
           - name: Checkout lil
             uses: actions/checkout@v2
           - name: Prepare build
             run: |
                 set -x
-                mkdir -p build/
-                meson setup --buildtype=debugoptimized build/
+                mkdir -p build build-util
+                meson setup --buildtype=debugoptimized --cross-file=.github/workflows/ci.cross-file build/
+                meson setup --buildtype=debugoptimized --native-file=.github/workflows/ci.cross-file -Dbuild_utils=true build-util/
           - name: Build lil
             run: |
                 set -x
                 ninja
             working-directory: build/
+          - name: Build lil-utils
+            run: |
+                set -x
+                ninja
+            working-directory: build-util/

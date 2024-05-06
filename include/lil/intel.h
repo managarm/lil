@@ -4,8 +4,19 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <lil/pch.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint32_t GpuAddr;
 struct LilGpu;
+
+typedef enum LilError {
+	LIL_SUCCESS,
+	LIL_TIMEOUT,
+	LIL_INVALID_PLL,
+} LilError;
 
 typedef enum LilConnectorType {
     HDMI,
@@ -15,8 +26,9 @@ typedef enum LilConnectorType {
 } LilConnectorType;
 
 typedef struct LilModeInfo {
-    uint32_t clock;
-    int vactive;
+	/* pixel clock in KHz */
+	uint32_t clock;
+	int vactive;
 	int vsyncStart;
 	int vsyncEnd;
 	int vtotal;
@@ -24,12 +36,25 @@ typedef struct LilModeInfo {
 	int hsyncStart;
 	int hsyncEnd;
 	int htotal;
-    int bpc;
+	int bpc;
+	int bpp;
+	int hsyncPolarity;
+	int vsyncPolarity;
+	uint16_t horizontalMm;
+	uint16_t verticalMm;
 } LilModeInfo;
 
 /*
  * Note: intel gpus only have one valid (connector, encoder, crtc)
  */
+
+enum LilDdiId {
+	DDI_A,
+	DDI_B,
+	DDI_C,
+	DDI_D,
+	DDI_E,
+};
 
 typedef enum LilPlaneType {
     PRIMARY, CURSOR, SPRITE,
@@ -41,8 +66,10 @@ typedef struct LilPlane {
     GpuAddr surface_address;
     bool enabled;
     uint32_t pipe_id;
+	uint32_t pixel_format;
 
     bool (*update_surface) (struct LilGpu* gpu, struct LilPlane* plane, GpuAddr surface_address, GpuAddr line_stride);
+    uint32_t *(*get_formats) (struct LilGpu* gpu, size_t *num);
 } LilPlane;
 
 struct LilConnector;
@@ -51,10 +78,17 @@ typedef enum LilTranscoder {
     TRANSCODER_A,
     TRANSCODER_B,
     TRANSCODER_C,
-    TRANSCODER_D,
-
     TRANSCODER_EDP,
+    INVALID_TRANSCODER,
 } LilTranscoder;
+
+typedef enum LilPllId {
+	INVALID_PLL = 0,
+	LCPLL1 = 1,
+	LCPLL2 = 2,
+	WRPLL1 = 3,
+	WRPLL2 = 4,
+} LilPllId;
 
 typedef struct LilCrtc {
     LilModeInfo current_mode;
@@ -69,7 +103,77 @@ typedef struct LilCrtc {
 
     void (*shutdown) (struct LilGpu* gpu, struct LilCrtc* crtc);
     void (*commit_modeset) (struct LilGpu* gpu, struct LilCrtc* crtc);
+
+	LilPllId pll_id;
 } LilCrtc;
+
+typedef struct LilEncoderEdp {
+	uint8_t backlight_control_method_type;
+	uint8_t backlight_inverter_type;
+	uint8_t backlight_inverter_polarity;
+	uint16_t pwm_inv_freq;
+	uint32_t initial_brightness;
+	uint8_t min_brightness;
+	uint16_t pwm_on_to_backlight_enable;
+
+	uint8_t edp_vswing_preemph;
+	bool edp_iboost;
+	bool edp_port_reversal;
+	bool ssc_bits;
+	bool edp_downspread;
+	bool edp_fast_link_training;
+	bool edp_fast_link_training_supported;
+	uint8_t edp_fast_link_rate;
+	uint8_t edp_fast_link_lanes;
+	uint8_t edp_max_link_rate;
+	uint8_t edp_max_lanes;
+	uint8_t edp_lane_count;
+	uint8_t edp_dpcd_rev;
+	int edp_color_depth;
+	uint8_t edp_balance_leg_val;
+
+	bool edp_vbios_hotplug_support;
+	bool edp_full_link_params_provided;
+
+	uint32_t t1_t3;
+	uint32_t t8;
+	uint32_t t9;
+	uint32_t t10;
+	uint32_t t11_12;
+
+	bool t3_optimization;
+	bool dynamic_cdclk_supported;
+
+	uint16_t supported_link_rates[8];
+	size_t supported_link_rates_len;
+} LilEncoderEdp;
+
+typedef struct LilEncoderDp {
+	bool vbios_hotplug_support;
+	uint8_t ddc_pin;
+	uint8_t aux_ch;
+	uint8_t onboard_redriver_emph_vswing;
+	uint8_t dp_max_link_rate;
+	uint8_t dp_lane_count;
+	bool support_tps3_pattern;
+	bool support_enhanced_frame_caps;
+} LilEncoderDp;
+
+typedef struct LilEncoderHdmi {
+	uint8_t ddc_pin;
+	uint8_t aux_ch;
+	uint8_t iboost_level;
+	uint8_t hdmi_level_shift;
+	bool iboost;
+} LilEncoderHdmi;
+
+typedef struct LilEncoder {
+	union {
+		LilEncoderEdp edp;
+		LilEncoderDp dp;
+		LilEncoderHdmi hdmi;
+	};
+} LilEncoder;
 
 typedef struct LilConnectorInfo {
     uint32_t num_modes;
@@ -90,6 +194,18 @@ typedef struct PllLilLimits {
     LilLimit p2;
 } PllLilLimits;
 
+enum LilAuxChannel {
+	AUX_CH_A,
+	AUX_CH_B,
+	AUX_CH_C,
+	AUX_CH_D,
+	AUX_CH_E,
+	AUX_CH_F,
+	AUX_CH_G,
+	AUX_CH_H,
+	AUX_CH_I,
+};
+
 typedef struct LilConnector {
     bool (*is_connected) (struct LilGpu* gpu, struct LilConnector* connector);
     LilConnectorInfo (*get_connector_info) (struct LilGpu* gpu, struct LilConnector* connector);
@@ -102,6 +218,7 @@ typedef struct LilConnector {
     PllLilLimits limits;
 
     LilCrtc* crtc;
+	LilEncoder *encoder;
 
     bool on_pch;
 
@@ -109,6 +226,9 @@ typedef struct LilConnector {
     //indicates whether vertical sync/blank is happening for this connector.
     bool vsync;
     bool vblank;
+
+	enum LilDdiId ddi_id;
+	enum LilAuxChannel aux_ch;
 } LilConnector;
 
 typedef enum LilInterruptEnableMask {
@@ -119,26 +239,59 @@ typedef enum LilInterruptEnableMask {
 
 typedef enum LilGpuGen {
     GEN_IVB = 7,
-    GEN_CFL = 9,
+    GEN_SKL = 9,
 } LilGpuGen;
 
+typedef enum LilGpuSubGen {
+	SUBGEN_NONE,
+	SUBGEN_GEMINI_LAKE, // Gen9LP
+	SUBGEN_KABY_LAKE, // Gen9p5
+	SUBGEN_COFFEE_LAKE,
+} LilGpuSubGen;
+
+typedef enum LilGpuVariant {
+	H,
+	ULT,
+	ULX,
+} LilGpuVariant;
+
 typedef struct LilGpu {
+    uint32_t max_connectors;
     uint32_t num_connectors;
     LilConnector* connectors;
 
     LilGpuGen gen;
+    LilGpuSubGen subgen;
+    LilGpuVariant variant;
+	enum LilPchGen pch_gen;
 
     uintptr_t gpio_start;
     uintptr_t mmio_start;
     uintptr_t vram;
     uintptr_t gtt_address;
     size_t gtt_size;
+	size_t stolen_memory_pages;
 
     void (*enable_display_interrupt) (struct LilGpu* gpu, uint32_t enable_mask);
     void (*process_interrupt) (struct LilGpu* gpu);
 
     void (*vmem_clear) (struct LilGpu* gpu);
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
+
+	const struct vbt_header *vbt_header;
+
+	/* reference clock frequency in MHz */
+	uint32_t ref_clock_freq;
+
+	uint32_t mem_latency_first_set;
+	uint32_t mem_latency_second_set;
+
+	bool vco_8640;
+	uint32_t boot_cdclk_freq;
+	uint32_t cdclk_freq;
+
+    void *dev;
+	uint16_t pch_dev;
 } LilGpu;
 
 /*
@@ -151,7 +304,9 @@ typedef struct LilGpu {
  * - set the surface_address for the planes
  * - call commit_modeset
  */
-void lil_init_gpu(LilGpu* ret, void* pci_device);
+void lil_init_gpu(LilGpu* ret, void* pci_device, uint16_t pch_id);
 
-typedef struct LilIrqType {
-} LilIrqType;
+
+#ifdef __cplusplus
+}
+#endif

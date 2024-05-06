@@ -51,4 +51,12 @@ typedef struct DisplayData {
     uint8_t checksum;
 } DisplayData;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void edid_timing_to_mode(DisplayData* edid, DetailTiming timing, LilModeInfo* mode);
+
+#ifdef __cplusplus
+}
+#endif
