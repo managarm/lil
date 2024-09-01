@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <vector>
+
 #include <lil/imports.h>
 #include <lil/vbt.h>
 
@@ -18,20 +21,25 @@
 #include <unistd.h>
 
 static struct option longopts[] = {
-	{"blocks", no_argument, 0, 'b'},
+	{"blocks", no_argument, 0, 'B'},
 	{"block", required_argument, 0, 'b'},
+	{"help", no_argument, 0, 'h'},
+	{"all", no_argument, 0, 'a'},
 	{0, 0, 0, 0},
 };
 
 static void dump_block(const struct vbt_header *hdr, int block);
 
 int main(int argc, char *argv[]) {
+	opterr = 0;
+
 	bool print_blocks = false;
-	int dump_block_id = -1;
+	bool dump_all_blocks = false;
+	std::vector<int> dump_block_ids = {};
 
 	while(1) {
 		int option_index = 0;
-		int c = getopt_long(argc, argv, "b:B", longopts, &option_index);
+		int c = getopt_long(argc, argv, "b:Bah", longopts, &option_index);
 
 		if(c == -1) {
 			break;
@@ -43,11 +51,23 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 			case 'b': {
-				dump_block_id = atoi(optarg);
+				dump_block_ids.push_back(atoi(optarg));
 				break;
 			}
+			case 'a': {
+				dump_all_blocks = true;
+				break;
+			}
+			case 'h': {
+				printf("help: vbt [-B] [-b BLOCK] [-a] [-] input...");
+				exit(0);
+			}
+			case '?': {
+				fprintf(stderr, "error: unknown option '-%c'\n", optopt);
+				exit(1);
+			}
 			default: {
-				fprintf(stderr, "getopt_long returned %c\n", c);
+				fprintf(stderr, "error: getopt_long returned '%c'\n", c);
 				break;
 			}
 		}
@@ -107,6 +127,14 @@ int main(int argc, char *argv[]) {
 	const struct bdb_header *bdb_hdr = vbt_get_bdb_header(hdr);
 	assert(bdb_hdr);
 
+	if(dump_all_blocks) {
+		for(size_t i = 0; i < 256; i++) {
+			if(vbt_get_bdb_block<bdb_block_header>(hdr, bdb_block_id(i))) {
+				dump_block_ids.push_back(i);
+			}
+		}
+	}
+
 	if(print_blocks) {
 		printf("Blocks:");
 		for(size_t i = 0; i < 256; i++) {
@@ -117,8 +145,10 @@ int main(int argc, char *argv[]) {
 		printf("\n");
 	}
 
-	if(dump_block_id != -1) {
-		dump_block(hdr, dump_block_id);
+	std::sort(dump_block_ids.begin(), dump_block_ids.end());
+
+	for(auto id : dump_block_ids) {
+		dump_block(hdr, id);
 	}
 
 	munmap(vbt, vbt_len);
@@ -211,8 +241,7 @@ static const char *parse_prd_pipe(uint8_t pipe) {
 static void dump_block(const struct vbt_header *hdr, int block) {
 	const struct bdb_block_header *b = vbt_get_bdb_block<bdb_block_header>(hdr, bdb_block_id(block));
 	ptrdiff_t offset = (b) ? ((uintptr_t) b - (uintptr_t) hdr) : 0;
-	printf("Block %d starts at offset: %#lx\n", block, offset);
-	printf("dumping Block %d:\n", block);
+	printf("Dumping Block %d (offset 0x%lx):\n", block, offset);
 
 	if(!b) {
 		puts("\t<block not present>");
@@ -310,4 +339,6 @@ static void dump_block(const struct vbt_header *hdr, int block) {
 			break;
 		}
 	}
+
+	printf("\n");
 }
