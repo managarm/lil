@@ -5,14 +5,14 @@ on: [push, pull_request]
 jobs:
     build-lil:
         name: Build lil
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         steps:
           - name: Install prerequisites
             run: |
                 set -x
                 sudo apt-get update
-                sudo apt-get install gcc-13 ninja-build
-                pip3 install meson
+                sudo apt-get install gcc ninja-build
+                pip3 install meson --break-system-packages
           - name: Checkout lil
             uses: actions/checkout@v2
           - name: Prepare build
