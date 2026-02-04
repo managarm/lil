@@ -40,7 +40,7 @@ void kbl_crtc_init(LilGpu *gpu, LilCrtc *crtc) {
 	enum LilPllId pll_id = INVALID_PLL;
 
 	if(crtc->connector->type != EDP) {
-		uint32_t pll_choice = REG(DPLL_CTRL2) & DPLL_CTRL2_DDI_CLOCK_SELECT_MASK(crtc->connector->ddi_id) >> DPLL_CTRL2_DDI_CLOCK_SELECT_SHIFT(crtc->connector->ddi_id);
+		uint32_t pll_choice = (REG(DPLL_CTRL2) & DPLL_CTRL2_DDI_CLOCK_SELECT_MASK(crtc->connector->ddi_id)) >> DPLL_CTRL2_DDI_CLOCK_SELECT_SHIFT(crtc->connector->ddi_id);
 
 		switch(pll_choice) {
 			case 0: {
