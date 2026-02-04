@@ -72,7 +72,7 @@ void pll_find(LilGpu *gpu, LilCrtc *crtc) {
 		lil_panic("should not be reached");
 	}
 
-	if(crtc->connector->type == EDP && !crtc->connector->encoder->edp.edp_downspread) {
+	if(crtc->connector->type == EDP/* && !crtc->connector->encoder->edp.edp_downspread*/) {
 		crtc->pll_id = LCPLL1;
 		return;
 	}
