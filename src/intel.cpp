@@ -30,8 +30,6 @@ void lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
 	pch::get_gen(ret);
     ret->subgen = SUBGEN_NONE;
 
-	vbt_init(ret);
-
     switch (device_id) {
         case 0x0166 : {
             ret->gen = GEN_IVB;
@@ -44,6 +42,8 @@ void lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
         case 0x5916:
 		case 0x3E9B:
         case 0x5917: {
+            vbt_init(ret);
+
 			uint8_t prog_if = lil_pci_readb(device, PCI_HDR_PROG_IF);
 			lil_assert(!prog_if);
 			kbl::init_gpu(ret);

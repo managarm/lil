@@ -28,11 +28,10 @@ const struct vbt_header *lil_vbt_locate(LilGpu *gpu) {
 	}
 
 	lil_log(VERBOSE, "ACPI OpRegion %u.%u.%u\n", opregion->over.major, opregion->over.minor, opregion->over.revision);
-	opregion_asle *asle = NULL;
+	opregion_asle *asle = nullptr;
 
-	if(opregion->mbox & MBOX_ASLE) {
+	if(opregion->mbox & MBOX_ASLE)
 		asle = reinterpret_cast<opregion_asle *>(uintptr_t(opregion) + OPREGION_ASLE_OFFSET);
-	}
 
 	if(opregion->over.major >= 2 && asle && asle->rvda && asle->rvds) {
 		uint64_t rvda = asle->rvda;
