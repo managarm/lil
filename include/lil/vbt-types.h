@@ -42,8 +42,8 @@ enum bdb_block_id {
 };
 
 /* block 1 */
-struct bdb_general_features {
-	struct bdb_block_header header;
+struct bdb_general_features : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_GENERAL_FEATURES;
 
 	uint8_t panel_fitting: 2;
 	uint8_t flexaim: 1;
@@ -208,8 +208,8 @@ struct child_device {
 	uint8_t dp_max_link_rate_reserved: 5;
 } __attribute__((packed));
 
-struct bdb_general_definitions {
-	struct bdb_block_header header;
+struct bdb_general_definitions : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_GENERAL_DEFINITIONS;
 
 	uint8_t crt_ddc_gmbus_pin;
 	uint8_t dpms_non_acpi: 1;
@@ -224,8 +224,9 @@ struct bdb_general_definitions {
 } __attribute__((packed));
 
 /* block 12 */
-struct bdb_driver_features {
-	struct bdb_block_header header;
+struct bdb_driver_features : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_DRIVER_FEATURES;
+
 	uint8_t _bits0;
 	uint16_t boot_mode_x;
 	uint16_t boot_mode_y;
@@ -276,8 +277,9 @@ struct oem_mode_entry {
 	uint8_t dtd[18];
 } __attribute__((packed));
 
-struct bdb_oem_mode {
-	struct bdb_block_header header;
+struct bdb_oem_mode : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_OEM_MODE;
+
 	uint8_t num;
 	uint8_t entry_size;
 	struct oem_mode_entry entries[6];
@@ -319,8 +321,8 @@ struct edp_apical_params {
 	uint32_t backlight_scale;
 } __attribute__((packed));
 
-struct bdb_edp {
-	struct bdb_block_header header;
+struct bdb_edp : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_EDP;
 
 	struct edp_power_seq power_seqs[16];
 	uint32_t color_depth;
@@ -342,8 +344,8 @@ struct bdb_edp {
 } __attribute__((packed));
 
 /* block 40 */
-struct bdb_lvds_options {
-	struct bdb_block_header header;
+struct bdb_lvds_options : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_LVDS_OPTIONS;
 
 	uint8_t panel_type;
 	uint8_t panel_type2;
@@ -389,8 +391,8 @@ struct lfp_backlight_control_method {
 	uint8_t controller: 4;
 } __attribute__((packed));
 
-struct bdb_lfp_blc {
-	struct bdb_block_header header;
+struct bdb_lfp_blc : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_LVDS_BLC;
 
 	uint8_t size;
 	struct lfp_backlight_data_entry panel[16];
@@ -399,8 +401,8 @@ struct bdb_lfp_blc {
 } __attribute__((packed));
 
 /* block 51 */
-struct bdb_fixed_mode_set {
-	struct bdb_block_header header;
+struct bdb_fixed_mode_set : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_FIXED_MODE_SET;
 
 	uint8_t feature_enable;
 	uint32_t x_res;
@@ -414,8 +416,8 @@ struct prd_entry {
 	uint8_t pipe_b;
 } __attribute__((packed));
 
-struct bdb_prd_boot_table {
-	struct bdb_block_header header;
+struct bdb_prd_boot_table : bdb_block_header {
+	static constexpr bdb_block_id blockId = BDB_PRD_BOOT_TABLE;
 
 	struct prd_entry entries[16];
 	uint16_t num;

@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 
 	if(dump_all_blocks) {
 		for(size_t i = 0; i < 256; i++) {
-			if(vbt_get_bdb_block<bdb_block_header>(hdr, bdb_block_id(i))) {
+			if(vbt_get_bdb_block_generic(hdr, bdb_block_id(i))) {
 				dump_block_ids.push_back(i);
 			}
 		}
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 	if(print_blocks) {
 		printf("Blocks:");
 		for(size_t i = 0; i < 256; i++) {
-			if(vbt_get_bdb_block<bdb_block_header>(hdr, bdb_block_id(i))) {
+			if(vbt_get_bdb_block_generic(hdr, bdb_block_id(i))) {
 				printf(" %zu", i);
 			}
 		}
@@ -239,7 +239,7 @@ static const char *parse_prd_pipe(uint8_t pipe) {
 }
 
 static void dump_block(const struct vbt_header *hdr, int block) {
-	const struct bdb_block_header *b = vbt_get_bdb_block<bdb_block_header>(hdr, bdb_block_id(block));
+	const struct bdb_block_header *b = vbt_get_bdb_block_generic(hdr, bdb_block_id(block));
 	ptrdiff_t offset = (b) ? ((uintptr_t) b - (uintptr_t) hdr) : 0;
 	printf("Dumping Block %d (offset 0x%lx):\n", block, offset);
 
@@ -252,7 +252,7 @@ static void dump_block(const struct vbt_header *hdr, int block) {
 		case BDB_GENERAL_DEFINITIONS: {
 			const struct bdb_general_definitions *d = reinterpret_cast<const bdb_general_definitions *>(b);
 
-			size_t children = (d->header.size - sizeof(*d) + sizeof(struct bdb_block_header)) / d->child_dev_size;
+			size_t children = (d->size - sizeof(*d) + sizeof(struct bdb_block_header)) / d->child_dev_size;
 			printf("\tChild dev count %zu\n", children);
 			printf("\tChild dev size %u\n", d->child_dev_size);
 

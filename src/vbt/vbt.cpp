@@ -87,11 +87,11 @@ void vbt_init(LilGpu *gpu) {
 	if(!bdb_hdr)
 		lil_panic("BDB header not found");
 
-	auto driver_features_block = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header, BDB_DRIVER_FEATURES);
+	auto driver_features_block = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header);
 	if(!driver_features_block)
 		lil_panic("BDB driver features not found");
 
-	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header);
 	if(!general_defs)
 		lil_panic("BDB general definitions not found");
 }
@@ -138,8 +138,8 @@ enum LilAuxChannel vbt_parse_aux_channel(uint8_t aux_ch) {
 void vbt_setup_children(LilGpu *gpu) {
 	size_t con_id = 0;
 
-	const struct bdb_driver_features *driver_features = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header, BDB_DRIVER_FEATURES);
-	const struct bdb_general_definitions *general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	const struct bdb_driver_features *driver_features = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header);
+	const struct bdb_general_definitions *general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header);
 
 	if(driver_features->lvds_config != LVDS_CONFIG_NONE && !skipEmbeddedDisplayPort) {
 		auto dev = reinterpret_cast<const child_device *>(&general_defs->child_dev);
@@ -180,7 +180,7 @@ void vbt_setup_children(LilGpu *gpu) {
 		con_id++;
 	}
 
-	size_t children = (general_defs->header.size - sizeof(*general_defs) + sizeof(struct bdb_block_header)) / general_defs->child_dev_size;
+	size_t children = (general_defs->size - sizeof(*general_defs) + sizeof(struct bdb_block_header)) / general_defs->child_dev_size;
 
 	for(size_t child = con_id; child < children; child++) {
 		auto dev = reinterpret_cast<struct child_device *>(uintptr_t(&general_defs->child_dev) + (child * general_defs->child_dev_size));

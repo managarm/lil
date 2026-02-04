@@ -70,7 +70,7 @@ void kbl_crtc_init(LilGpu *gpu, LilCrtc *crtc) {
 
 	crtc->pll_id = pll_id;
 
-	auto f = vbt_get_bdb_block<bdb_fixed_mode_set>(gpu->vbt_header, BDB_FIXED_MODE_SET);
+	auto f = vbt_get_bdb_block<bdb_fixed_mode_set>(gpu->vbt_header);
 	if(f) {
 		/* TODO: handle the VBT bdb block for fixed mode set */
 		lil_assert(!f->feature_enable);
