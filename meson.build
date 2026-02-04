@@ -3,6 +3,8 @@ project('lil', ['c', 'cpp'],
 	meson_version: '>=1.3.0',
 )
 
+pkgconfig = import('pkgconfig')
+
 header_only = get_option('header_only')
 build_utils = get_option('build_utils')
 
@@ -12,6 +14,15 @@ endif
 
 add_project_arguments(['-Wno-unused-function', '-Wno-unused-variable', '-Wno-unused-parameter', '-Wimplicit-fallthrough'], language: ['c', 'cpp'])
 add_project_arguments(['-Werror=incompatible-pointer-types'], language: ['c'])
+
+public_headers = files(
+    'include/lil/fourcc.h',
+    'include/lil/imports.h',
+    'include/lil/intel.h',
+    'include/lil/pch.h',
+    'include/lil/vbt-types.h',
+    'include/lil/vbt.h',
+)
 
 sources = files(
     'src/avi.cpp',
@@ -67,15 +78,21 @@ util_watermarks_sources = util_sources + files(
 )
 
 include_directories = include_directories('include')
+library = static_library('lil', sources, include_directories: include_directories, pic: false, install: true)
+lil_dep = declare_dependency(link_with: library, include_directories: include_directories)
 
-if header_only
-	lil_dep = declare_dependency(include_directories: include_directories)
-else
-	library = static_library('lil', sources, include_directories: include_directories, pic: false, install: not header_only)
-	lil_dep = declare_dependency(link_with: library, include_directories: include_directories)
+if not build_utils
+    install_headers(public_headers, subdir: 'lil')
+    pkgconfig.generate(library)
 endif
 
 if build_utils
-	util_vbt = executable('vbt', util_vbt_sources, dependencies: lil_dep, native: true, install: true)
-	util_watermarks = executable('watermarks', util_watermarks_sources, dependencies: lil_dep, native: true, install: true)
+	util_vbt = executable('vbt', util_vbt_sources,
+        dependencies: lil_dep,
+        install: true
+    )
+	util_watermarks = executable('watermarks', util_watermarks_sources,
+        dependencies: lil_dep,
+        install: true
+    )
 endif
