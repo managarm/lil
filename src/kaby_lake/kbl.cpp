@@ -1,7 +1,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
-#include <set>
+#include <array>
 
 #include "src/debug.hpp"
 #include "src/kaby_lake/cdclk.hpp"
@@ -141,7 +141,7 @@ void init_gpu(LilGpu* gpu) {
 	kbl::setup::psr_disable(gpu);
 
 	/* TODO: on cold boot, perform the display init sequence */
-	std::set<LilTranscoder> transcoders = {TRANSCODER_A, TRANSCODER_B, TRANSCODER_C};
+	std::array transcoders = {TRANSCODER_A, TRANSCODER_B, TRANSCODER_C};
 
 	// Disable every transcoder
 	for(auto transcoder : transcoders) {
