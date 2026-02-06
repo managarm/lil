@@ -31,4 +31,4 @@ bool rw(LilGpu *gpu, uint32_t *data0, uint32_t *data1, Mailbox mbox, uint32_t *t
 	return success;
 }
 
-}
+} // namespace kbl::pcode

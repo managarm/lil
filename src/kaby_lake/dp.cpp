@@ -504,4 +504,4 @@ void crtc_shutdown(LilGpu *gpu, LilCrtc *crtc) {
 	}
 }
 
-}
+} // namespace kbl::dp

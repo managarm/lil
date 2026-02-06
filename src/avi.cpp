@@ -101,4 +101,4 @@ void infoframe_populate(LilCrtc *crtc, void *data) {
 	f->nups = HDMI_NUPS_BOTH;
 }
 
-}
+} // namespace hdmi::avi

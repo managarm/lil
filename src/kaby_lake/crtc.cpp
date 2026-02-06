@@ -95,4 +95,4 @@ void pll_find(LilGpu *gpu, LilCrtc *crtc) {
 	}
 }
 
-}
+} // namespace kbl::crtc
