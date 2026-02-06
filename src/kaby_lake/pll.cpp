@@ -358,4 +358,4 @@ void dpll_ctrl_enable(LilGpu *gpu, LilCrtc *crtc, uint32_t link_rate) {
 	}
 }
 
-}
+} // namespace kbl::pll

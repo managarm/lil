@@ -27,7 +27,7 @@ uint_fixed_16_16_t method2(uint32_t latency, uint32_t pixel_rate, uint32_t htota
 	return mul_u32_fixed16(tmp, plane_blocks_per_line);
 }
 
-}
+} // namespace
 
 namespace kbl::watermarks {
 

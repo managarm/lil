@@ -17,7 +17,7 @@ void wait_for_vblank(LilGpu *gpu, LilPlane *plane) {
 		lil_log(WARNING, "timeout on wait_for_vblank\n");
 }
 
-}
+} // namespace
 
 namespace kbl::plane {
 
@@ -40,7 +40,7 @@ uint32_t linetime_us(uint32_t pixel_clock, uint32_t htotal) {
 	return div_u32_ceil(htotal * 1000, pixel_clock);
 }
 
-}
+} // namespace
 
 void enable(LilGpu *gpu, LilCrtc *crtc, bool vblank_wait) {
 	uint32_t htotal = crtc->current_mode.htotal;

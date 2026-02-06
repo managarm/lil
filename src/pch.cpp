@@ -70,4 +70,4 @@ void get_gen(LilGpu *gpu) {
 		gpu->pch_gen = NO_PCH;
 }
 
-}
+} // namespace pch

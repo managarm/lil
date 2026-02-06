@@ -27,4 +27,4 @@ void vmem_map(LilGpu* gpu, uint64_t host, GpuAddr gpu_addr) {
     GTT64_ENTRY(gpu, gpu_addr) = (host & mask) | GTT_PAGE_PRESENT;
 }
 
-}
+} // namespace kbl::gtt

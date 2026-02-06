@@ -155,4 +155,4 @@ void clock_disable(LilGpu *gpu, LilCrtc *crtc) {
 	REG(DPLL_CTRL2) |= (1 << (15 + crtc->connector->ddi_id));
 }
 
-}
+} // namespace kbl::ddi

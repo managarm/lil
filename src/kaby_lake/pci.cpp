@@ -30,7 +30,7 @@ struct variant_desc {
 	{ GEMINI_LAKE_ULX_IDS, GEN_SKL, SUBGEN_GEMINI_LAKE, ULX },
 };
 
-}
+} // namespace
 
 namespace kbl::pci {
 

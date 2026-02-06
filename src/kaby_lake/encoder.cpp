@@ -151,4 +151,4 @@ void hdmi_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
 	enc->hdmi.hdmi_level_shift = dev->hdmi_level_shifter_value;
 }
 
-}
+} // namespace kbl::encoder

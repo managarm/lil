@@ -1,6 +1,6 @@
 [binaries]
-c = ['gcc-13']
-cpp = ['g++-13']
+c = ['gcc']
+cpp = ['g++']
 
 [host_machine]
 system = 'linux'
