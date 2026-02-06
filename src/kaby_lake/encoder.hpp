@@ -2,6 +2,8 @@
 
 #include <lil/intel.h>
 
+#include "src/vbt/vbt-types.hpp"
+
 namespace kbl::encoder {
 
 void edp_init(LilGpu *gpu, LilEncoder *enc);

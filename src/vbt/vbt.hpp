@@ -9,6 +9,8 @@
 #include <lil/intel.h>
 #include <lil/vbt-types.h>
 
+#include "src/vbt/vbt-types.hpp"
+
 const struct bdb_header *vbt_get_bdb_header(const struct vbt_header *hdr);
 
 inline size_t bdb_block_size(const void *hdr) {
