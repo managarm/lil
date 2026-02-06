@@ -304,7 +304,7 @@ typedef struct LilGpu {
  * - set the surface_address for the planes
  * - call commit_modeset
  */
-void lil_init_gpu(LilGpu* ret, void* pci_device, uint16_t pch_id);
+bool lil_init_gpu(LilGpu* ret, void* pci_device, uint16_t pch_id);
 
 
 #ifdef __cplusplus
