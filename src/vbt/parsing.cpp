@@ -12,20 +12,20 @@ const struct vbt_header *vbt_get_header(const void *vbt, size_t size) {
 	for(size_t i = 0; i + 4 < size; i++) {
 		auto header = reinterpret_cast<const struct vbt_header *>(uintptr_t(vbt) + i);
 
-		if(memcmp(header->signature, VBT_HEADER_SIGNATURE, 4))
+		if(std::string_view{reinterpret_cast<const char *>(header->signature), 4} != VBT_HEADER_SIGNATURE)
 			continue;
 
 		return header;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 const struct bdb_header *vbt_get_bdb_header(const struct vbt_header *hdr) {
 	auto bdb = reinterpret_cast<struct bdb_header *>(uintptr_t(hdr) + hdr->bdb_offset);
 
-	if(memcmp(bdb->signature, BDB_HEADER_SIGNATURE, 16))
-		return NULL;
+	if(std::string_view{reinterpret_cast<const char *>(bdb->signature), 16} == BDB_HEADER_SIGNATURE)
+		return nullptr;
 
 	return bdb;
 }
@@ -112,9 +112,9 @@ static struct {
 
 const char *vbt_dvo_get_name(uint8_t dvo) {
 	if(dvo > DVO_PORT_MAX)
-		return NULL;
+		return nullptr;
 
-	auto val = std::find_if(std::begin(dvo_port_names), std::end(dvo_port_names), [dvo](auto &m) {
+	auto val = std::ranges::find_if(dvo_port_names, [dvo](auto &m) {
 		return m.dvo == dvo;
 	});
 

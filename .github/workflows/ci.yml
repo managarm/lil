@@ -11,21 +11,27 @@ jobs:
             run: |
                 set -x
                 sudo apt-get update
-                sudo apt-get install gcc ninja-build
+                sudo apt-get install -y gcc ninja-build
                 pip3 install meson --break-system-packages
           - name: Checkout lil
             uses: actions/checkout@v2
           - name: Prepare build
             run: |
                 set -x
-                mkdir -p build build-util
+                mkdir -p build build-freestanding build-util
                 meson setup --buildtype=debugoptimized --cross-file=.github/workflows/ci.cross-file build/
+                meson setup --buildtype=debugoptimized -Dc_args="-ffreestanding" -Dcpp_args="-ffreestanding" --cross-file=.github/workflows/ci.cross-file build-freestanding/
                 meson setup --buildtype=debugoptimized --native-file=.github/workflows/ci.cross-file -Dbuild_utils=true build-util/
           - name: Build lil
             run: |
                 set -x
                 ninja
             working-directory: build/
+          - name: Build lil (freestanding)
+            run: |
+                set -x
+                ninja
+            working-directory: build-freestanding/
           - name: Build lil-utils
             run: |
                 set -x

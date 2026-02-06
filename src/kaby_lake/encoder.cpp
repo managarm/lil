@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <lil/imports.h>
 #include <lil/intel.h>
 #include <lil/vbt-types.h>
@@ -32,14 +34,10 @@ void edp_init(LilGpu *gpu, LilEncoder *enc) {
 	} else {
 		uint8_t max_lanes = 4;
 
-		for(size_t child = 0; child < 8; child++) {
-			if(general_defs->child_dev[child].device_type) {
-				if(general_defs->child_dev[child].dvo_port == 12 || general_defs->child_dev[child].dvo_port == 11) {
-					max_lanes = 2;
-					break;
-				}
-			}
-		}
+		if (std::ranges::any_of(*general_defs, [](auto &dev) {
+			return dev.device_type && (dev.dvo_port == 12 || dev.dvo_port == 11);
+		}))
+			max_lanes = 2;
 
 		enc->edp.edp_max_lanes = max_lanes;
 	}

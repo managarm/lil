@@ -51,7 +51,7 @@ int main() {
 	int fd = open("/sys/bus/pci/devices/0000:00:02.0/resource0", O_RDWR | O_CLOEXEC);
 	assert(fd > 0);
 
-	void *gpu_mmio = mmap(NULL, 2 * 1024 * 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	void *gpu_mmio = mmap(nullptr, 2 * 1024 * 1024, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
 	if(gpu_mmio == MAP_FAILED) {
 		printf("%s\n", strerror(errno));

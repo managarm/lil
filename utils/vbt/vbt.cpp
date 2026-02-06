@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 	void *vbt;
 
 	if(statbuf.st_size) {
-		vbt = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+		vbt = mmap(nullptr, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 		assert(vbt != MAP_FAILED);
 		close(fd);
 		vbt_len = statbuf.st_size;
