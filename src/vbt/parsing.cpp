@@ -24,7 +24,7 @@ const struct vbt_header *vbt_get_header(const void *vbt, size_t size) {
 const struct bdb_header *vbt_get_bdb_header(const struct vbt_header *hdr) {
 	auto bdb = reinterpret_cast<struct bdb_header *>(uintptr_t(hdr) + hdr->bdb_offset);
 
-	if(std::string_view{reinterpret_cast<const char *>(bdb->signature), 16} == BDB_HEADER_SIGNATURE)
+	if(std::string_view{reinterpret_cast<const char *>(bdb->signature), 16} != BDB_HEADER_SIGNATURE)
 		return nullptr;
 
 	return bdb;
