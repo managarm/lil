@@ -6,12 +6,13 @@ jobs:
     build-lil:
         name: Build lil
         runs-on: ubuntu-24.04
+        container: debian:trixie
         steps:
           - name: Install prerequisites
             run: |
                 set -x
-                sudo apt-get update
-                sudo apt-get install -y gcc ninja-build
+                apt-get update
+                apt-get install -y gcc ninja-build clang-tidy python3-pip
                 pip3 install meson --break-system-packages
           - name: Checkout lil
             uses: actions/checkout@v2
@@ -37,3 +38,6 @@ jobs:
                 set -x
                 ninja
             working-directory: build-util/
+          - name: Run clang-tidy
+            run: |
+                run-clang-tidy -config-file .clang-tidy -p build -extra-arg=-fno-caret-diagnostics -warnings-as-errors=* -quiet "\.(h|c|cpp|hpp)$"
