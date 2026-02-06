@@ -1,2 +1,5 @@
-*.d
-*.o
+.*
+!.git*
+*.xbstrap
+
+compile_commands.json
