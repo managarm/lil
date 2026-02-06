@@ -1,8 +1,10 @@
 #pragma once
 
+#include <concepts>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <type_traits>
 
 #include <lil/intel.h>
 #include <lil/vbt-types.h>
@@ -17,7 +19,26 @@ inline size_t bdb_block_size(const void *hdr) {
 }
 
 template<typename T>
-const T *vbt_get_bdb_block(const struct vbt_header *hdr, enum bdb_block_id id) {
+	requires requires {
+		requires std::same_as<std::remove_cvref_t<decltype(T::blockId)>, bdb_block_id>;
+		typename std::integral_constant<bdb_block_id, T::blockId>;
+		requires std::derived_from<T, bdb_block_header>;
+	}
+const T *vbt_get_bdb_block(const struct vbt_header *hdr) {
+	const struct bdb_header *bdb = vbt_get_bdb_header(hdr);
+	auto block = reinterpret_cast<const struct bdb_block_header *>(uintptr_t(bdb) + bdb->header_size);
+	size_t index = 0;
+
+	for(; index + 3 < bdb->bdb_size && index + bdb_block_size(block) <= bdb->bdb_size;
+			block = reinterpret_cast<const struct bdb_block_header *>(uintptr_t(block) + bdb_block_size(block))) {
+		if(T::blockId == block->id)
+			return reinterpret_cast<const T *>(block);
+	}
+
+	return nullptr;
+}
+
+inline const bdb_block_header *vbt_get_bdb_block_generic(const struct vbt_header *hdr, enum bdb_block_id id) {
 	const struct bdb_header *bdb = vbt_get_bdb_header(hdr);
 	auto block = reinterpret_cast<const struct bdb_block_header *>(uintptr_t(bdb) + bdb->header_size);
 	size_t index = 0;
@@ -25,10 +46,10 @@ const T *vbt_get_bdb_block(const struct vbt_header *hdr, enum bdb_block_id id) {
 	for(; index + 3 < bdb->bdb_size && index + bdb_block_size(block) <= bdb->bdb_size;
 			block = reinterpret_cast<const struct bdb_block_header *>(uintptr_t(block) + bdb_block_size(block))) {
 		if(id == block->id)
-			return reinterpret_cast<const T *>(block);
+			return reinterpret_cast<const bdb_block_header *>(block);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void vbt_init(LilGpu *gpu);

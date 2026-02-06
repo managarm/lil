@@ -8,13 +8,13 @@
 namespace kbl::encoder {
 
 void edp_init(LilGpu *gpu, LilEncoder *enc) {
-	auto lvds_options = vbt_get_bdb_block<bdb_lvds_options>(gpu->vbt_header, BDB_LVDS_OPTIONS);
-	auto edp = vbt_get_bdb_block<bdb_edp>(gpu->vbt_header, BDB_EDP);
+	auto lvds_options = vbt_get_bdb_block<bdb_lvds_options>(gpu->vbt_header);
+	auto edp = vbt_get_bdb_block<bdb_edp>(gpu->vbt_header);
 	if(!edp)
 		lil_panic("BDB eDP not found");
 
 	uint8_t panel_type = lvds_options->panel_type;
-	auto lfp_blc = vbt_get_bdb_block<bdb_lfp_blc>(gpu->vbt_header, BDB_LVDS_BLC);
+	auto lfp_blc = vbt_get_bdb_block<bdb_lfp_blc>(gpu->vbt_header);
 
 	enc->edp.backlight_control_method_type = lfp_blc->backlight_control[panel_type].type & 0xF;
 	enc->edp.backlight_inverter_type = lfp_blc->panel[panel_type].type & 3;
@@ -25,7 +25,7 @@ void edp_init(LilGpu *gpu, LilEncoder *enc) {
 
 	enc->edp.ssc_bits = (lvds_options->ssc_bits >> panel_type) & 1;
 
-	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header);
 
 	if(gpu->connectors[0].ddi_id) {
 		enc->edp.edp_max_lanes = 4;
@@ -106,7 +106,7 @@ void edp_init(LilGpu *gpu, LilEncoder *enc) {
 			break;
 	}
 
-	auto general_features = vbt_get_bdb_block<bdb_general_features>(gpu->vbt_header, BDB_GENERAL_FEATURES);
+	auto general_features = vbt_get_bdb_block<bdb_general_features>(gpu->vbt_header);
 	if(!general_features)
 		lil_panic("BDB general features not found");
 
@@ -115,13 +115,13 @@ void edp_init(LilGpu *gpu, LilEncoder *enc) {
 }
 
 void dp_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
-	auto general_features = vbt_get_bdb_block<bdb_general_features>(gpu->vbt_header, BDB_GENERAL_FEATURES);
+	auto general_features = vbt_get_bdb_block<bdb_general_features>(gpu->vbt_header);
 	if(!general_features)
 		lil_panic("BDB general features not found");
 
 	enc->dp.vbios_hotplug_support = general_features->vbios_hotplug_support;
 
-	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header);
 	enc->dp.ddc_pin = dev->ddc_pin;
 	enc->dp.aux_ch = dev->aux_channel;
 	enc->dp.onboard_redriver_emph_vswing = dev->onboard_redriver & 0x3f;
@@ -130,7 +130,7 @@ void dp_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
 }
 
 void hdmi_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
-	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header, BDB_GENERAL_DEFINITIONS);
+	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header);
 
 	uint8_t iboost_level = 0;
 	switch(dev->hdmi_iboost_level) {

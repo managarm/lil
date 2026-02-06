@@ -40,7 +40,7 @@ void kbl_crtc_init(LilGpu *gpu, LilCrtc *crtc) {
 	enum LilPllId pll_id = INVALID_PLL;
 
 	if(crtc->connector->type != EDP) {
-		uint32_t pll_choice = REG(DPLL_CTRL2) & DPLL_CTRL2_DDI_CLOCK_SELECT_MASK(crtc->connector->ddi_id) >> DPLL_CTRL2_DDI_CLOCK_SELECT_SHIFT(crtc->connector->ddi_id);
+		uint32_t pll_choice = (REG(DPLL_CTRL2) & DPLL_CTRL2_DDI_CLOCK_SELECT_MASK(crtc->connector->ddi_id)) >> DPLL_CTRL2_DDI_CLOCK_SELECT_SHIFT(crtc->connector->ddi_id);
 
 		switch(pll_choice) {
 			case 0: {
@@ -70,7 +70,7 @@ void kbl_crtc_init(LilGpu *gpu, LilCrtc *crtc) {
 
 	crtc->pll_id = pll_id;
 
-	auto f = vbt_get_bdb_block<bdb_fixed_mode_set>(gpu->vbt_header, BDB_FIXED_MODE_SET);
+	auto f = vbt_get_bdb_block<bdb_fixed_mode_set>(gpu->vbt_header);
 	if(f) {
 		/* TODO: handle the VBT bdb block for fixed mode set */
 		lil_assert(!f->feature_enable);
