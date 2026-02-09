@@ -35,13 +35,6 @@ static struct port_info {
 	{ SFUSE_STRAP, (1 << 0), (1 << 20), (3 << 16), },
 };
 
-uint32_t get_gtt_size(void* device) {
-    uint16_t mggc0 = lil_pci_readw(device, PCI_MGGC0);
-    uint8_t size = 1 << ((mggc0 >> 6) & 0b11);
-
-    return size * 1024 * 1024;
-}
-
 } // namespace
 
 namespace kbl::setup {
