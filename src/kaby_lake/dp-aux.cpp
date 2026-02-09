@@ -1,6 +1,7 @@
 #include <lil/intel.h>
 #include <lil/imports.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/dp-aux.hpp"
 #include "src/gmbus.h"
 #include "src/regs.h"
@@ -40,7 +41,9 @@ void dp_unpack_aux(uint32_t src, uint8_t* data, uint8_t size) {
 		data[i] = (src >> ((3 - i) * 8));
 }
 
-uint32_t dp_get_aux_clock_div(struct LilGpu* gpu, int i) {
+uint32_t dp_get_aux_clock_div(LilGpu *lil_gpu, int i) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	if(gpu->gen >= GEN_SKL) {
 		return i ? 0 : 1; // Skylake and up will automatically derive the divider
 	} else {
@@ -48,7 +51,9 @@ uint32_t dp_get_aux_clock_div(struct LilGpu* gpu, int i) {
 	}
 }
 
-uint32_t dp_get_aux_send_ctl(struct LilGpu* gpu, uint8_t txsize) {
+uint32_t dp_get_aux_send_ctl(LilGpu *lil_gpu, uint8_t txsize) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	if(gpu->gen >= GEN_SKL) {
 		return DDI_AUX_CTL_BUSY | DDI_AUX_CTL_DONE | DDI_AUX_CTL_TIMEOUT | DDI_AUX_CTL_TIMEOUT_VAL_MAX | DDI_AUX_CTL_RX_ERR | DDI_AUX_SET_MSG_SIZE(txsize) | DDI_AUX_CTL_SKL_FW_SYNC_PULSE(32) | DDI_AUX_CTL_SKL_SYNC_PULSE(32);
 	} else {

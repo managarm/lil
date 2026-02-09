@@ -1,6 +1,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/dpcd.hpp"
 #include "src/kaby_lake/ddi.hpp"
 #include "src/kaby_lake/dp-aux.hpp"
@@ -47,8 +48,9 @@ bool aux_readable(LilGpu *gpu, LilConnector *con) {
 	return true;
 }
 
-bool pre_enable(LilGpu *gpu, LilConnector *con) {
+bool pre_enable(LilGpu *lil_gpu, LilConnector *con) {
 	LilEncoder *enc = con->encoder;
+	auto gpu = static_cast<Gpu *>(lil_gpu);
 
 	if((gpu->variant == ULT || gpu->variant == ULX) && con->ddi_id == DDI_D) {
 		lil_panic("unsupported eDP configuration");

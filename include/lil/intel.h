@@ -237,33 +237,10 @@ typedef enum LilInterruptEnableMask {
     VBLANK_C, VSYNC_C
 } LilInterruptEnableMask;
 
-typedef enum LilGpuGen {
-    GEN_IVB = 7,
-    GEN_SKL = 9,
-} LilGpuGen;
-
-typedef enum LilGpuSubGen {
-	SUBGEN_NONE,
-	SUBGEN_GEMINI_LAKE, // Gen9LP
-	SUBGEN_KABY_LAKE, // Gen9p5
-	SUBGEN_COFFEE_LAKE,
-} LilGpuSubGen;
-
-typedef enum LilGpuVariant {
-	H,
-	ULT,
-	ULX,
-} LilGpuVariant;
-
 typedef struct LilGpu {
     uint32_t max_connectors;
     uint32_t num_connectors;
-    LilConnector* connectors;
-
-    LilGpuGen gen;
-    LilGpuSubGen subgen;
-    LilGpuVariant variant;
-	enum LilPchGen pch_gen;
+    LilConnector *connectors;
 
     uintptr_t gpio_start;
     uintptr_t mmio_start;
@@ -278,20 +255,7 @@ typedef struct LilGpu {
     void (*vmem_clear) (struct LilGpu* gpu);
     void (*vmem_map) (struct LilGpu* gpu, uint64_t host, GpuAddr gpu_addr);
 
-	const struct vbt_header *vbt_header;
-
-	/* reference clock frequency in MHz */
-	uint32_t ref_clock_freq;
-
-	uint32_t mem_latency_first_set;
-	uint32_t mem_latency_second_set;
-
-	bool vco_8640;
-	uint32_t boot_cdclk_freq;
-	uint32_t cdclk_freq;
-
-    void *dev;
-	uint16_t pch_dev;
+	void *dev;
 } LilGpu;
 
 /*
@@ -304,7 +268,7 @@ typedef struct LilGpu {
  * - set the surface_address for the planes
  * - call commit_modeset
  */
-bool lil_init_gpu(LilGpu* ret, void* pci_device, uint16_t pch_id);
+bool lil_init_gpu(LilGpu **ret, void *pci_device, uint16_t pch_id);
 
 
 #ifdef __cplusplus

@@ -1,6 +1,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/ddi.hpp"
 #include "src/kaby_lake/ddi-translations.hpp"
 #include "src/regs.h"
@@ -25,7 +26,9 @@ bool hotplug_detected(LilGpu *gpu, enum LilDdiId ddi_id) {
 	return (REG(SDEISR) & mask);
 }
 
-static const struct lil_ddi_buf_trans *ddi_translation_table(LilGpu *gpu, LilConnector *con, bool hdmi) {
+static const struct lil_ddi_buf_trans *ddi_translation_table(LilGpu *lil_gpu, LilConnector *con, bool hdmi) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	if(hdmi) {
 		if(gpu->gen == GEN_SKL && (gpu->subgen == SUBGEN_NONE || gpu->subgen == SUBGEN_KABY_LAKE)) {
 			if(gpu->variant == ULX)

@@ -5,10 +5,13 @@
 #include "src/kaby_lake/kbl.hpp"
 #include "src/pch.hpp"
 #include "src/pci.h"
+#include "src/base.hpp"
 #include "src/vbt/vbt.hpp"
 
-bool lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
-   uint32_t config_0 = lil_pci_readd(device, PCI_HDR_VENDOR_ID);
+bool lil_init_gpu(LilGpu **ret, void *device, uint16_t pch_id) {
+	auto gpu = new Gpu{device, pch_id};
+
+	uint32_t config_0 = lil_pci_readd(device, PCI_HDR_VENDOR_ID);
 	if (config_0 == 0xffffffff)
 		return false;
 
@@ -21,17 +24,15 @@ bool lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
 	if (pci_class != 0x300)
 		return false;
 
-	ret->dev = device;
-	ret->pch_dev = pch_id;
-
-	pch::get_gen(ret);
-	ret->subgen = SUBGEN_NONE;
+	pch::get_gen(gpu);
+	gpu->subgen = SUBGEN_NONE;
 
 	switch (device_id) {
 		case 0x0116:
 		case 0x0166: {
-			ret->gen = GEN_IVB;
-			lil_init_ivb_gpu(ret, device);
+			gpu->gen = GEN_IVB;
+			lil_init_ivb_gpu(gpu, device);
+			*ret = gpu;
 			return true;
 		}
 
@@ -40,11 +41,12 @@ bool lil_init_gpu(LilGpu* ret, void* device, uint16_t pch_id) {
 		case 0x5916:
 		case 0x3E9B:
 		case 0x5917: {
-			vbt_init(ret);
+			vbt_init(gpu);
 
-			uint8_t prog_if = lil_pci_readb(device, PCI_HDR_PROG_IF);
+			uint8_t prog_if = gpu->pci_read<uint8_t>(PCI_HDR_PROG_IF);
 			lil_assert(!prog_if);
-			kbl::init_gpu(ret);
+			kbl::init_gpu(gpu);
+			*ret = gpu;
 			return true;
 		}
 

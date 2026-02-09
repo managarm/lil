@@ -1,6 +1,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/regs.h"
 
 static bool pll_available(LilGpu *gpu, uint32_t reg) {
@@ -49,7 +50,9 @@ static bool pll_available(LilGpu *gpu, uint32_t reg) {
 
 namespace kbl::crtc {
 
-void pll_find(LilGpu *gpu, LilCrtc *crtc) {
+void pll_find(LilGpu *lil_gpu, LilCrtc *crtc) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	if(gpu->subgen == SUBGEN_GEMINI_LAKE && crtc->connector->type != EDP) {
 		// Gemini Lake has a fixed mapping from pipe to PLL
 		switch(crtc->transcoder) {

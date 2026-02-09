@@ -1,6 +1,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/pci.h"
 #include "src/regs.h"
@@ -45,7 +46,9 @@ uint32_t get_gtt_size(void* device) {
 
 namespace kbl::setup {
 
-void setup(LilGpu *gpu) {
+void setup(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	/* enable Bus Mastering and Memory + I/O space access */
 	uint16_t command = lil_pci_readw(gpu->dev, PCI_HDR_COMMAND);
 	lil_pci_writew(gpu->dev, PCI_HDR_COMMAND, command | 7); /* Bus Master | Memory Space | I/O Space */
@@ -95,7 +98,9 @@ void setup(LilGpu *gpu) {
     gpu->vram = bar2_base;
 }
 
-void initialize_display(LilGpu* gpu) {
+void initialize_display(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	REG(GDT_CHICKEN_BITS) &= ~0x80;
 	REG(NDE_RSTWRN_OPT) |= 0x10;
 
