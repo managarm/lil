@@ -11,7 +11,7 @@
 bool lil_init_gpu(LilGpu **ret, void *device, uint16_t pch_id) {
 	auto gpu = new Gpu{device, pch_id};
 
-	uint32_t config_0 = lil_pci_readd(device, PCI_HDR_VENDOR_ID);
+	auto config_0 = gpu->pci_read<uint32_t>(PCI_HDR_VENDOR_ID);
 	if (config_0 == 0xffffffff)
 		return false;
 
@@ -20,7 +20,7 @@ bool lil_init_gpu(LilGpu **ret, void *device, uint16_t pch_id) {
 	if (vendor_id != 0x8086)
 		return false;
 
-	uint16_t pci_class = lil_pci_readw(device, PCI_HDR_SUBCLASS);
+	uint16_t pci_class = gpu->pci_read<uint16_t>(PCI_HDR_SUBCLASS);
 	if (pci_class != 0x300)
 		return false;
 

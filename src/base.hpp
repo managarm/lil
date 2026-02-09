@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <stddef.h>
 #include <lil/imports.h>
 
@@ -23,6 +24,10 @@ struct Base {
 	virtual ~Base() = default;
 };
 
+template <typename T>
+concept PciAccessType =
+    std::same_as<T, uint8_t> || std::same_as<T, uint16_t> || std::same_as<T, uint32_t>;
+
 enum LilGpuGen {
 	GEN_IVB = 7,
 	GEN_SKL = 9,
@@ -45,6 +50,28 @@ struct Gpu : LilGpu, public Base {
 	Gpu(void *dev, uint16_t pch_dev)
 	: pch_dev{pch_dev} {
 		this->dev = dev;
+	}
+
+	template <PciAccessType T>
+	T pci_read(uint16_t offset) {
+		if constexpr (std::same_as<T, uint8_t>) {
+			return lil_pci_readb(dev, offset);
+		} else if constexpr (std::same_as<T, uint16_t>) {
+			return lil_pci_readw(dev, offset);
+		} else if constexpr (std::same_as<T, uint32_t>) {
+			return lil_pci_readd(dev, offset);
+		}
+	}
+
+	template <PciAccessType T>
+	void pci_write(uint16_t offset, T value) {
+		if constexpr (std::same_as<T, uint8_t>) {
+			lil_pci_writeb(dev, offset, value);
+		} else if constexpr (std::same_as<T, uint16_t>) {
+			lil_pci_writew(dev, offset, value);
+		} else if constexpr (std::same_as<T, uint32_t>) {
+			lil_pci_writed(dev, offset, value);
+		}
 	}
 
 	uint16_t pch_dev;

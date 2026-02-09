@@ -20,7 +20,7 @@
 const struct vbt_header *lil_vbt_locate(LilGpu *lil_gpu) {
 	auto gpu = static_cast<Gpu *>(lil_gpu);
 
-	uint32_t asls_phys = lil_pci_readd(gpu->dev, PCI_ASLS);
+	auto asls_phys = gpu->pci_read<uint32_t>(PCI_ASLS);
 	if(!asls_phys) {
 		lil_panic("ACPI OpRegion not supported");
 	}
