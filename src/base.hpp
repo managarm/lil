@@ -2,7 +2,9 @@
 
 #include <concepts>
 #include <stddef.h>
+#include <stdint.h>
 #include <lil/imports.h>
+#include <utility>
 
 struct Base {
 	static void *operator new(size_t size) {
@@ -23,6 +25,53 @@ struct Base {
 
 	virtual ~Base() = default;
 };
+
+enum class Prefix {
+	None = 1,
+	Kilo = 1'000,
+	Mega = 1'000'000,
+};
+
+template <Prefix S = Prefix::None, typename T = uint64_t>
+struct Hertz {
+	// Stores the frequency in S * Hz.
+	T frequency;
+
+	template <Prefix N>
+	operator Hertz<N>() const {
+		return Hertz<N>{Hz() / std::to_underlying(N)};
+	}
+
+	template <typename C = T>
+	inline C Hz() const {
+		return C{frequency * std::to_underlying(S)};
+	}
+
+	template <typename C = T>
+	inline C kHz() const {
+		return C{Hz() / 1'000};
+	}
+
+	template <typename C = T>
+	inline C MHz() const {
+		return C{Hz() / 1'000'000};
+	}
+};
+
+static_assert(std::is_standard_layout_v<Hertz<Prefix::None>>);
+static_assert(std::is_trivial_v<Hertz<Prefix::None>>);
+
+inline Hertz<Prefix::None> operator ""_Hz(unsigned long long f) {
+	return Hertz{f};
+}
+
+inline Hertz<Prefix::Kilo> operator ""_kHz(unsigned long long f) {
+	return Hertz<Prefix::Kilo>{f};
+}
+
+inline Hertz<Prefix::Mega> operator ""_MHz(unsigned long long f) {
+	return Hertz<Prefix::Mega>{f};
+}
 
 template <typename T>
 concept PciAccessType =
@@ -83,7 +132,7 @@ struct Gpu : LilGpu, public Base {
 	LilPchGen pch_gen;
 
 	/* reference clock frequency in MHz */
-	uint32_t ref_clock_freq;
+	Hertz<Prefix::Mega> ref_clock_freq;
 
 	uint32_t mem_latency_first_set;
 	uint32_t mem_latency_second_set;

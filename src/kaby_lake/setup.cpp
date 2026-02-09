@@ -51,9 +51,9 @@ void setup(LilGpu *lil_gpu) {
 	lil_assert(gpu->pch_gen != INVALID_PCH_GEN);
 	if(gpu->pch_gen == LPT) {
 		/* LPT has this meme where apparently the reference clock is 125 MHz */
-		gpu->ref_clock_freq = 125;
+		gpu->ref_clock_freq = 125_MHz;
 	} else {
-		gpu->ref_clock_freq = 24;
+		gpu->ref_clock_freq = 24_MHz;
 	}
 
 	if(gpu->pch_gen != NO_PCH)

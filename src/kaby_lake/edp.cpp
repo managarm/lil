@@ -78,13 +78,13 @@ bool pre_enable(LilGpu *lil_gpu, LilConnector *con) {
 		}
 
 		REG(SHOTPLUG_CTL) = REG(SHOTPLUG_CTL);
-		uint32_t ref_div = 100 * gpu->ref_clock_freq;
+		uint32_t ref_div = 100 * gpu->ref_clock_freq.MHz();
 		REG(PP_OFF_DELAYS) = (enc->edp.t10 << 16) | (REG(PP_OFF_DELAYS) & 0xE000E000);
 		REG(PP_DIVISOR) = (enc->edp.t11_12 & 0xFF) | (((ref_div >> 1) - 1) << 8);
 		REG(PP_CONTROL) |= PP_CONTROL_RESET;
 
 		if(enc->edp.backlight_control_method_type == 2 && enc->edp.backlight_inverter_type == 2) {
-			uint32_t backlight_level = ((1000000 * gpu->ref_clock_freq) / enc->edp.pwm_inv_freq) >> 4;
+			uint32_t backlight_level = (gpu->ref_clock_freq.Hz() / enc->edp.pwm_inv_freq) >> 4;
 
 			if(backlight_level < 100) {
 				backlight_level = 100;
