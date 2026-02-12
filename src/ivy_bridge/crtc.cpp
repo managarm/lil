@@ -419,9 +419,14 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
 
     if (crtc->planes[0].enabled) {
         volatile uint32_t* primary_plane_control = (uint32_t*)(gpu->mmio_start + PRI_CTL_BASE + crtc->pipe_id * 0x1000);
-        set_mask(primary_plane_control, 1, PLANE_ENABLE);
-        *pri_surf  = crtc->planes[0].surface_address & ~0xfff;
+        val = *primary_plane_control;
+        val |= PLANE_ENABLE;
+        val &= (0b1111 << 26);
+        val |= (0b0110 << 26);
+        *primary_plane_control = val;
+
         *pri_linoff  = crtc->planes[0].surface_address & 0xfff;
+        *pri_surf  = crtc->planes[0].surface_address & ~0xfff;
     }
 
     volatile uint32_t* fdi_rx_tu_size = (uint32_t*)(gpu->mmio_start + FDI_RX_TU_SIZE_BASE + 0x1000 * crtc->pipe_id);

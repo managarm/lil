@@ -1,3 +1,5 @@
+#include <array>
+#include <lil/fourcc.h>
 #include <lil/imports.h>
 #include <lil/intel.h>
 
@@ -32,6 +34,15 @@ PllLilLimits ivb_limits_single_lvds = {
     .p1 = { .min = 2, .max = 8 },
     .p2 = { .dot_limit = 225000, .slow = 14, .fast = 14 },
 };
+
+std::array<uint32_t, 1> supported_formats = {
+    FORMAT_XRGB8888,
+};
+
+uint32_t *get_formats(struct LilGpu *gpu, size_t *num) {
+    *num = supported_formats.size();
+    return supported_formats.data();
+}
 
 void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->gpio_start = 0xC0000;
@@ -71,6 +82,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
         ret->connectors[0].crtc->planes[i].enabled = 0;
         ret->connectors[0].crtc->planes[i].pipe_id = 0;
         ret->connectors[0].crtc->planes[i].update_surface = lil_ivb_update_primary_surface;
+        ret->connectors[0].crtc->planes[i].get_formats = get_formats;
     }
     ret->connectors[0].crtc->pipe_id = 0;
     ret->connectors[0].crtc->commit_modeset = lil_ivb_commit_modeset;
