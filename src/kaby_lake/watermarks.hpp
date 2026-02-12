@@ -6,7 +6,7 @@
 
 #include <lil/imports.h>
 
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 
 #include <stddef.h>
 #include <stdint.h>

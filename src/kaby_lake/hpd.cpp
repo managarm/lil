@@ -2,7 +2,7 @@
 #include <lil/intel.h>
 
 #include "src/kaby_lake/hpd.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 

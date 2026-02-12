@@ -1,5 +1,5 @@
 #include "src/kaby_lake/ddi-translations.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 
 /* Kabylake H and S */
 static const struct lil_ddi_buf_trans_entry _kbl_trans_dp[] = {

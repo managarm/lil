@@ -1,6 +1,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/pci.hpp"
 
 namespace {
@@ -34,8 +35,10 @@ struct variant_desc {
 
 namespace kbl::pci {
 
-void detect(LilGpu *gpu) {
-	uint16_t dev_id = lil_pci_readw(gpu->dev, 2);
+void detect(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
+	uint16_t dev_id = gpu->pci_read<uint16_t>(2);
 
 	for(size_t i = 0; i < (sizeof(variants)/sizeof(*variants)); i++) {
 		struct variant_desc *desc = &variants[i];

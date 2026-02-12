@@ -1,8 +1,9 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/dpcd.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/kaby_lake/crtc.hpp"
 #include "src/kaby_lake/ddi.hpp"
@@ -14,7 +15,7 @@
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/pll.hpp"
 #include "src/kaby_lake/transcoder.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 
@@ -110,7 +111,8 @@ void enable_vblank(LilGpu *gpu, LilCrtc *crtc) {
 
 namespace kbl::dp {
 
-bool pre_enable(LilGpu *gpu, LilConnector *con) {
+bool pre_enable(LilGpu *lil_gpu, LilConnector *con) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
 	LilEncoder *enc = con->encoder;
 
 	if((gpu->variant == ULT || gpu->variant == ULX) && (con->ddi_id == DDI_D || con->ddi_id == DDI_E)) {
@@ -216,8 +218,8 @@ bool is_connected(struct LilGpu* gpu, struct LilConnector* connector) {
 	return REG(SDEISR) & sde_isr_mask;
 }
 
-LilConnectorInfo get_connector_info(struct LilGpu* gpu, struct LilConnector* connector) {
-    (void)connector;
+LilConnectorInfo get_connector_info(LilGpu *lil_gpu, struct LilConnector *connector) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
     LilConnectorInfo ret = {};
     LilModeInfo* info = (LilModeInfo *) lil_malloc(sizeof(LilModeInfo) * 4);
 
@@ -244,7 +246,9 @@ LilConnectorInfo get_connector_info(struct LilGpu* gpu, struct LilConnector* con
     return ret;
 }
 
-void commit_modeset(struct LilGpu* gpu, struct LilCrtc* crtc) {
+void commit_modeset(LilGpu *lil_gpu, struct LilCrtc *crtc) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	LilConnector *con = crtc->connector;
 	LilEncoder *enc = con->encoder;
 

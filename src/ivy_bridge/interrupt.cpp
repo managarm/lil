@@ -1,4 +1,4 @@
-#include "src/ivy_bridge/interrupt.h"
+#include "src/ivy_bridge/interrupt.hpp"
 
 void lil_ivb_enable_display_interrupt (LilGpu* gpu, uint32_t enable_mask) {
     volatile uint32_t* de_isr = (uint32_t*)(gpu->mmio_start + 0x44000);

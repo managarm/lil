@@ -1,10 +1,11 @@
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/debug.hpp"
 #include "src/dpcd.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/transcoder.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::transcoder {
 
@@ -27,7 +28,9 @@ void disable(LilGpu *gpu, LilTranscoder transcoder) {
 	wait_for_bit_unset(REG_PTR(base(transcoder) + TRANS_CONF), TRANS_CONF_STATE, 21000, 1000);
 }
 
-void ddi_disable(LilGpu *gpu, LilTranscoder transcoder) {
+void ddi_disable(LilGpu *lil_gpu, LilTranscoder transcoder) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	REG(base(transcoder) + TRANS_DDI_FUNC_CTL) &= ~(TRANS_DDI_FUNC_CTL_ENABLE | TRANS_DDI_FUNC_CTL_SELECT_DDI_MASK);
 
 	if(gpu->subgen == SUBGEN_GEMINI_LAKE) {

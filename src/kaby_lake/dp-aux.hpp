@@ -2,7 +2,7 @@
 
 #include <lil/intel.h>
 
-#include "src/edid.h"
+#include "src/edid.hpp"
 
 namespace kbl::dp::aux {
 

@@ -1,9 +1,10 @@
 #include <lil/intel.h>
 #include <lil/imports.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/kaby_lake/pcode.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 
@@ -41,7 +42,9 @@ uint32_t dec_to_int(uint32_t cdclk_freq_decimal) {
 	return 0;
 }
 
-void set_freq(LilGpu *gpu, uint32_t cdclk_freq_int) {
+void set_freq(LilGpu *lil_gpu, uint32_t cdclk_freq_int) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	uint32_t cdfreq_decimal = 0;
 	uint32_t cdfreq_select = 0;
 
@@ -147,7 +150,9 @@ void set_freq(LilGpu *gpu, uint32_t cdclk_freq_int) {
 	gpu->cdclk_freq = cdclk_freq_int;
 }
 
-void set_for_pixel_clock(LilGpu *gpu, uint32_t *pixel_clock) {
+void set_for_pixel_clock(LilGpu *lil_gpu, uint32_t *pixel_clock) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	struct vco_lookup *table = (gpu->vco_8640) ? vco8640_lookup : vco8100_lookup;
 	size_t offset = 0;
 	uint32_t clock = *pixel_clock;

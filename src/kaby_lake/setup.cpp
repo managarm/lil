@@ -1,9 +1,10 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/cdclk.hpp"
-#include "src/pci.h"
-#include "src/regs.h"
+#include "src/pci.hpp"
+#include "src/regs.hpp"
 
 namespace {
 
@@ -34,37 +35,32 @@ static struct port_info {
 	{ SFUSE_STRAP, (1 << 0), (1 << 20), (3 << 16), },
 };
 
-uint32_t get_gtt_size(void* device) {
-    uint16_t mggc0 = lil_pci_readw(device, PCI_MGGC0);
-    uint8_t size = 1 << ((mggc0 >> 6) & 0b11);
-
-    return size * 1024 * 1024;
-}
-
 } // namespace
 
 namespace kbl::setup {
 
-void setup(LilGpu *gpu) {
+void setup(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	/* enable Bus Mastering and Memory + I/O space access */
-	uint16_t command = lil_pci_readw(gpu->dev, PCI_HDR_COMMAND);
-	lil_pci_writew(gpu->dev, PCI_HDR_COMMAND, command | 7); /* Bus Master | Memory Space | I/O Space */
-	command = lil_pci_readw(gpu->dev, PCI_HDR_COMMAND);
+	uint16_t command = gpu->pci_read<uint16_t>(PCI_HDR_COMMAND);
+	gpu->pci_write<uint16_t>(PCI_HDR_COMMAND, command | 7); /* Bus Master | Memory Space | I/O Space */
+	command = gpu->pci_read<uint16_t>(PCI_HDR_COMMAND);
 	lil_assert(command & 2);
 
 	lil_assert(gpu->pch_gen != INVALID_PCH_GEN);
 	if(gpu->pch_gen == LPT) {
 		/* LPT has this meme where apparently the reference clock is 125 MHz */
-		gpu->ref_clock_freq = 125;
+		gpu->ref_clock_freq = 125_MHz;
 	} else {
-		gpu->ref_clock_freq = 24;
+		gpu->ref_clock_freq = 24_MHz;
 	}
 
 	if(gpu->pch_gen != NO_PCH)
 		lil_log(VERBOSE, "\tPCH gen %u\n", gpu->pch_gen);
 
 	/* read the `GMCH Graphics Control` register */
-	uint8_t graphics_mode_select = lil_pci_readb(gpu->dev, 0x51);
+	uint8_t graphics_mode_select = gpu->pci_read<uint8_t>(0x51);
 	size_t pre_allocated_memory_mb = 0;
 
 	for(size_t i = 0; i < sizeof(graphics_mode_select_table) / sizeof(*graphics_mode_select_table); i++) {
@@ -95,7 +91,9 @@ void setup(LilGpu *gpu) {
     gpu->vram = bar2_base;
 }
 
-void initialize_display(LilGpu* gpu) {
+void initialize_display(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	REG(GDT_CHICKEN_BITS) &= ~0x80;
 	REG(NDE_RSTWRN_OPT) |= 0x10;
 

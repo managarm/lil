@@ -1,7 +1,7 @@
 #include <lil/intel.h>
 
 #include "src/kaby_lake/pipe.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::pipe {
 

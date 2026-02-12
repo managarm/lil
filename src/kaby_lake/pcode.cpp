@@ -1,7 +1,7 @@
 #include <lil/imports.h>
 
 #include "src/kaby_lake/pcode.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::pcode {
 

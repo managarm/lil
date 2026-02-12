@@ -2,6 +2,7 @@
 #include <lil/intel.h>
 #include <lil/pch.h>
 
+#include "src/base.hpp"
 #include "src/pch.hpp"
 
 static uint16_t LPT_PCIIDS[] = {
@@ -53,7 +54,9 @@ static bool in_pciid_list(uint16_t pci_id, uint16_t *list, size_t len) {
 
 namespace pch {
 
-void get_gen(LilGpu *gpu) {
+void get_gen(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	if(in_pciid_list(gpu->pch_dev, LPT_PCIIDS, sizeof(LPT_PCIIDS)))
 		gpu->pch_gen = LPT;
 	else if(in_pciid_list(gpu->pch_dev, LPT_LP_PCIIDS, sizeof(LPT_LP_PCIIDS)))

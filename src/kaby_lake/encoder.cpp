@@ -4,12 +4,15 @@
 #include <lil/intel.h>
 #include <lil/vbt-types.h>
 
+#include "src/base.hpp"
 #include "src/kaby_lake/encoder.hpp"
 #include "src/vbt/vbt.hpp"
 
 namespace kbl::encoder {
 
-void edp_init(LilGpu *gpu, LilEncoder *enc) {
+void edp_init(LilGpu *lil_gpu, LilEncoder *enc) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	auto lvds_options = vbt_get_bdb_block<bdb_lvds_options>(gpu->vbt_header);
 	auto edp = vbt_get_bdb_block<bdb_edp>(gpu->vbt_header);
 	if(!edp)
@@ -112,7 +115,9 @@ void edp_init(LilGpu *gpu, LilEncoder *enc) {
 	enc->edp.dynamic_cdclk_supported = general_features->display_clock_mode;
 }
 
-void dp_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
+void dp_init(LilGpu *lil_gpu, LilEncoder *enc, struct child_device *dev) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	auto general_features = vbt_get_bdb_block<bdb_general_features>(gpu->vbt_header);
 	if(!general_features)
 		lil_panic("BDB general features not found");
@@ -127,7 +132,9 @@ void dp_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
 	enc->dp.dp_lane_count = 0;
 }
 
-void hdmi_init(LilGpu *gpu, LilEncoder *enc, struct child_device *dev) {
+void hdmi_init(LilGpu *lil_gpu, LilEncoder *enc, struct child_device *dev) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	auto general_defs = vbt_get_bdb_block<bdb_general_definitions>(gpu->vbt_header);
 
 	uint8_t iboost_level = 0;

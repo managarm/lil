@@ -1,6 +1,6 @@
-#include "src/edid.h"
-#include "src/gmbus.h"
-#include "src/regs.h"
+#include "src/edid.hpp"
+#include "src/gmbus.hpp"
+#include "src/regs.hpp"
 
 #include <lil/imports.h>
 #include <lil/intel.h>
