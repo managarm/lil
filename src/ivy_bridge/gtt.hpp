@@ -2,7 +2,7 @@
 
 #include <lil/intel.h>
 
-#include "src/gtt.h"
+#include "src/gtt.hpp"
 
 #define GTT_IVB_CACHE_MLC_LLC 0b110
 

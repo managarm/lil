@@ -3,7 +3,7 @@
 
 #include "src/kaby_lake/dp-aux.hpp"
 #include "src/dpcd.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 

@@ -1,14 +1,14 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
-#include "src/ivy_bridge/ivb.h"
-#include "src/ivy_bridge/crtc.h"
-#include "src/ivy_bridge/interrupt.h"
-#include "src/ivy_bridge/plane.h"
-#include "src/ivy_bridge/gtt.h"
+#include "src/ivy_bridge/ivb.hpp"
+#include "src/ivy_bridge/crtc.hpp"
+#include "src/ivy_bridge/interrupt.hpp"
+#include "src/ivy_bridge/plane.hpp"
+#include "src/ivy_bridge/gtt.hpp"
 
-#include "src/pci.h"
-#include "src/lvds.h"
+#include "src/lvds.hpp"
+#include "src/pci.hpp"
 
 #define PCI_MGGC0 0x50
 
@@ -53,7 +53,7 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     //TODO currently we only support LVDS
 
     ret->num_connectors = 1;
-    ret->connectors = lil_malloc(sizeof(LilConnector) * ret->num_connectors);
+    ret->connectors = reinterpret_cast<LilConnector *>(lil_malloc(sizeof(LilConnector) * ret->num_connectors));
 
     ret->connectors[0].id = 0;
     ret->connectors[0].type = LVDS;
@@ -63,10 +63,10 @@ void lil_init_ivb_gpu(LilGpu* ret, void* device) {
     ret->connectors[0].set_state = lil_lvds_set_state;
     ret->connectors[0].limits = ivb_limits_single_lvds;
     ret->connectors[0].on_pch = true;
-    ret->connectors[0].crtc = lil_malloc(sizeof(LilCrtc));
+    ret->connectors[0].crtc = reinterpret_cast<LilCrtc *>(lil_malloc(sizeof(LilCrtc)));
     ret->connectors[0].crtc->connector = &ret->connectors[0];
     ret->connectors[0].crtc->num_planes = 1;
-    ret->connectors[0].crtc->planes = lil_malloc(sizeof(LilPlane));
+    ret->connectors[0].crtc->planes = reinterpret_cast<LilPlane *>(lil_malloc(sizeof(LilPlane)));
     for (size_t i = 0; i < ret->connectors[0].crtc->num_planes; i++) {
         ret->connectors[0].crtc->planes[i].enabled = 0;
         ret->connectors[0].crtc->planes[i].pipe_id = 0;

@@ -1,7 +1,7 @@
 #include <stdbool.h>
 
 #include <lil/imports.h>
-#include "src/ivy_bridge/crtc.h"
+#include "src/ivy_bridge/crtc.hpp"
 
 #define  BLC_PWM_CTL 0x48250
 #define  BLM_PWM_ENABLE (1u << 31)
@@ -22,6 +22,10 @@
 #define  FDI_TX_CTL_BASE 0x60100
 #define  FDI_RX_CTL_BASE 0xF000C
 #define  fdi_reg_off 0x1000
+#define FDI_LINK_TRAIN_NONE (3 << 28)
+#define FDI_LINK_TRAIN_PATTERN_1 (0 << 28)
+#define FDI_LINK_TRAIN_PATTERN_2 (1 << 28)
+#define FDI_LINK_TRAIN_PATTERN_IDLE (2 << 28)
 #define  FDI_LINK_TRAIN_NONE_IVB (3 << 8)
 #define  FDI_LINK_TRAIN_PATTERN_1_IVB  (0 << 8)
 #define  FDI_LINK_TRAIN_PATTERN_2_IVB  (1 << 8)
@@ -375,9 +379,9 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
 
     //enable connector again (done here because of linux)
     crtc->connector->set_state(
-            gpu, crtc->connector,
-            crtc->connector->get_state(gpu, crtc->connector) | (1u << 31)
-        );
+        gpu, crtc->connector,
+        crtc->connector->get_state(gpu, crtc->connector) | (1u << 31)
+    );
 
     //c: Leave panel power override enabled until later step
     //2: Enable PCH clock reference source and PCH SSC modulator, wait for warmup
@@ -407,7 +411,7 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
     lil_sleep(10);
     //7: Enable CPU pipe
     volatile uint32_t* pipe_config = (uint32_t*)(gpu->mmio_start + PIPE_CONF_BASE + crtc->pipe_id * 0x1000);
-    set_mask(pipe_config, 1, PIPE_ENABLE);
+    set_mask(pipe_config, 1, PIPE_ENABLE | (1 << 14));
     (void)*pipe_config;
     //8: Configure and enable CPU planes TODO do this based on planes
     volatile uint32_t* pri_surf = (uint32_t*)(gpu->mmio_start + PRI_SURF_BASE + 0x1000 * crtc->pipe_id);
@@ -434,6 +438,9 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
 
     if (!crtc->connector->on_pch) {
     } else {
+        int retry = 0;
+        int i = 0;
+
         //9: If enabling port on PCH
         //a: Program PCH FDI Receiver TU size same as Transmitter TU size for TU error checking
         *fdi_rx_tu_size = *pipe_m_1 & (0x3f << 25);
@@ -448,6 +455,107 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         *fdi_rx_imr = val;
         *fdi_rx_imr;
         (void)*fdi_rx_imr;
+
+// TODO: enable SNB support
+#if 0
+        lil_sleep(150);
+
+        uint32_t temp = *fdi_tx_ctl;
+        temp &= ~FDI_DP_PORT_WIDTH_MASK;
+        temp &= ~FDI_LINK_TRAIN_NONE;
+        temp |= FDI_LINK_TRAIN_PATTERN_1;
+        temp &= ~FDI_LINK_TRAIN_VOL_EMP_MASK;
+        temp |= FDI_LINK_TRAIN_400MV_0DB_SNB_B;
+        *fdi_tx_ctl = temp | FDI_ENABLE;
+
+        *fdi_rx_misc = FDI_RX_TP1_TO_TP2_48 | FDI_RX_FDI_DELAY_90;
+
+        temp = *fdi_rx_ctl;
+        temp &= ~FDI_LINK_TRAIN_PATTERN_MASK_CPT;
+        temp |= FDI_LINK_TRAIN_PATTERN_1_CPT;
+        *fdi_rx_ctl = temp | FDI_ENABLE;
+
+        *fdi_rx_ctl;
+        (void)*fdi_rx_ctl;
+
+        lil_sleep(150);
+
+        for (i = 0; i < 4; i++) {
+            temp = *fdi_tx_ctl;
+            temp &= ~FDI_LINK_TRAIN_VOL_EMP_MASK;
+            temp |= snb_b_fdi_train_param[i];
+            *fdi_tx_ctl = temp;
+
+            *fdi_tx_ctl;
+            (void)*fdi_tx_ctl;
+
+            lil_sleep(500);
+
+            for (int retry = 0; retry < 5; retry++) {
+                temp = *fdi_rx_iir;
+
+                if (temp & FDI_RX_BIT_LOCK) {
+                    *fdi_rx_iir = temp | FDI_RX_BIT_LOCK;
+                    break;
+                }
+                lil_sleep(50);
+            }
+
+            if (retry < 5)
+                break;
+        }
+
+        if (i == 4) {
+            lil_panic("FDI train 1 failed!");
+        }
+
+        /* Train 2 */
+        temp = *fdi_tx_ctl;
+        temp &= ~FDI_LINK_TRAIN_NONE;
+        temp |= FDI_LINK_TRAIN_PATTERN_2;
+        temp &= ~FDI_LINK_TRAIN_VOL_EMP_MASK;
+        temp |= FDI_LINK_TRAIN_400MV_0DB_SNB_B;
+        *fdi_tx_ctl = temp;
+
+        temp = *fdi_rx_ctl;
+        temp &= ~FDI_LINK_TRAIN_PATTERN_MASK_CPT;
+        temp |= FDI_LINK_TRAIN_PATTERN_2_CPT;
+        *fdi_rx_ctl = temp;
+
+        *fdi_rx_ctl;
+        (void)*fdi_rx_ctl;
+
+        lil_sleep(150);
+
+        for (i = 0; i < 4; i++) {
+            temp = *fdi_tx_ctl;
+            temp &= ~FDI_LINK_TRAIN_VOL_EMP_MASK;
+            temp |= snb_b_fdi_train_param[i];
+            *fdi_tx_ctl = temp;
+
+            *fdi_tx_ctl;
+            (void)*fdi_tx_ctl;
+
+            lil_sleep(500);
+
+            for (retry = 0; retry < 5; retry++) {
+                temp = *fdi_rx_iir;
+
+                if (temp & FDI_RX_SYMBOL_LOCK) {
+                    *fdi_rx_iir = temp | FDI_RX_SYMBOL_LOCK;
+                    break;
+                }
+                lil_sleep(50);
+            }
+
+            if (retry < 5)
+                break;
+        }
+
+        if (i == 4) {
+            lil_panic("FDI train 2 failed!");
+        }
+#else
         lil_sleep(100);
         for(int i = 0; i < 8; i++) {
             /* disable first in case we need to retry */
@@ -525,6 +633,8 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         train_done:
 	    //v: Enable PCH FDI Receiver Fill Start and Fill End Error Correction
 	    set_mask(fdi_rx_ctl, 1,  (1 << 27) | (1 << 26));
+#endif
+
 	    //steps reordered because of linux
 	    //d: Configure DPLL_SEL to set the DPLL to transcoder mapping and enable DPLL to the transcoder
         //TODO set DPLL_SEL based on the actual dpll chosen
@@ -576,6 +686,13 @@ void lil_ivb_commit_modeset (struct LilGpu* gpu, struct LilCrtc* crtc) {
         (void)*pch_trans_conf;
         lil_sleep(100);
     }
+
+    volatile uint32_t* pch_lvds = (uint32_t*)(gpu->mmio_start + 0xE1180);
+    *pch_lvds |= (1 << 31);
+
+    *pch_lvds;
+    (void) pch_lvds;
+
     //11: Enable panel power through panel power sequencing
     set_mask(pp_control, 1, PP_ON);
     //12: Wait for panel power sequencing to reach enabled steady state

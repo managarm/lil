@@ -15,7 +15,7 @@
 #include "src/kaby_lake/transcoder.hpp"
 #include "src/kaby_lake/pci.hpp"
 #include "src/kaby_lake/pcode.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 #include "src/vbt/vbt.hpp"
 
 namespace {

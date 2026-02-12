@@ -3,7 +3,7 @@
 
 #include "src/base.hpp"
 #include "src/dpcd.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/kaby_lake/crtc.hpp"
 #include "src/kaby_lake/ddi.hpp"
@@ -15,7 +15,7 @@
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/pll.hpp"
 #include "src/kaby_lake/transcoder.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 

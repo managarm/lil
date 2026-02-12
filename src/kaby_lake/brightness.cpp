@@ -1,5 +1,5 @@
 #include "src/kaby_lake/brightness.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::brightness {
 

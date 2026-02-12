@@ -4,7 +4,7 @@
 #include "src/base.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/kaby_lake/pcode.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 

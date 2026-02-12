@@ -2,7 +2,7 @@
 #include <lil/intel.h>
 
 #include "src/base.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 static bool pll_available(LilGpu *gpu, uint32_t reg) {
 	uint32_t hdport_state = REG(HDPORT_STATE);

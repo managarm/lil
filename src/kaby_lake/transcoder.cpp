@@ -3,9 +3,9 @@
 #include "src/base.hpp"
 #include "src/debug.hpp"
 #include "src/dpcd.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/transcoder.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::transcoder {
 

@@ -32,11 +32,11 @@ sources = files(
     'src/lvds.cpp',
     'src/pch.cpp',
 
-    'src/ivy_bridge/crtc.c',
-    'src/ivy_bridge/gtt.c',
-    'src/ivy_bridge/interrupt.c',
-    'src/ivy_bridge/ivb.c',
-    'src/ivy_bridge/plane.c',
+    'src/ivy_bridge/crtc.cpp',
+    'src/ivy_bridge/gtt.cpp',
+    'src/ivy_bridge/interrupt.cpp',
+    'src/ivy_bridge/ivb.cpp',
+    'src/ivy_bridge/plane.cpp',
 
     'src/kaby_lake/brightness.cpp',
     'src/kaby_lake/cdclk.cpp',

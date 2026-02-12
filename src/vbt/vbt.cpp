@@ -9,7 +9,7 @@
 #include "src/kaby_lake/hdmi.hpp"
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/dp.hpp"
-#include "src/pci.h"
+#include "src/pci.hpp"
 #include "src/vbt/opregion.hpp"
 #include "src/vbt/vbt.hpp"
 

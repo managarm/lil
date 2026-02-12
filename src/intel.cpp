@@ -1,10 +1,10 @@
 #include <lil/intel.h>
 #include <lil/imports.h>
 
-#include "src/ivy_bridge/ivb.h"
+#include "src/ivy_bridge/ivb.hpp"
 #include "src/kaby_lake/kbl.hpp"
 #include "src/pch.hpp"
-#include "src/pci.h"
+#include "src/pci.hpp"
 #include "src/base.hpp"
 #include "src/vbt/vbt.hpp"
 

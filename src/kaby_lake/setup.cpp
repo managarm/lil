@@ -3,8 +3,8 @@
 
 #include "src/base.hpp"
 #include "src/kaby_lake/cdclk.hpp"
-#include "src/pci.h"
-#include "src/regs.h"
+#include "src/pci.hpp"
+#include "src/regs.hpp"
 
 namespace {
 

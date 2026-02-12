@@ -1,7 +1,7 @@
 #include <lil/imports.h>
 
 #include "src/kaby_lake/watermarks.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 
 namespace {
 

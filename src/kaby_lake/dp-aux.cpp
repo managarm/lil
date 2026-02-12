@@ -3,8 +3,8 @@
 
 #include "src/base.hpp"
 #include "src/kaby_lake/dp-aux.hpp"
-#include "src/gmbus.h"
-#include "src/regs.h"
+#include "src/gmbus.hpp"
+#include "src/regs.hpp"
 
 #include <expected>
 

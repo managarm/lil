@@ -4,10 +4,10 @@
 #include <lil/imports.h>
 
 #include "src/base.hpp"
-#include "src/helpers.h"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/watermarks.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 

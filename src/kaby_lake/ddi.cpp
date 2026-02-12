@@ -4,7 +4,7 @@
 #include "src/base.hpp"
 #include "src/kaby_lake/ddi.hpp"
 #include "src/kaby_lake/ddi-translations.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::ddi {
 

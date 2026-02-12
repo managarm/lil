@@ -6,7 +6,7 @@
 #include "src/kaby_lake/ddi.hpp"
 #include "src/kaby_lake/dp-aux.hpp"
 #include "src/kaby_lake/edp.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::edp {
 
