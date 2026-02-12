@@ -31,7 +31,7 @@ bool lil_init_gpu(LilGpu **ret, void *device, uint16_t pch_id) {
 		case 0x0116:
 		case 0x0166: {
 			gpu->gen = GEN_IVB;
-			lil_init_ivb_gpu(gpu, device);
+			lil_init_ivb_gpu(gpu);
 			*ret = gpu;
 			return true;
 		}

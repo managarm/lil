@@ -1,13 +1,5 @@
 #pragma once
 
-#include <lil/intel.h>
+#include "src/base.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void lil_init_ivb_gpu(LilGpu* ret, void* device);
-
-#ifdef __cplusplus
-}
-#endif
+void lil_init_ivb_gpu(Gpu *ret);

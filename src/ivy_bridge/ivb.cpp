@@ -3,6 +3,7 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/ivy_bridge/ivb.hpp"
 #include "src/ivy_bridge/crtc.hpp"
 #include "src/ivy_bridge/interrupt.hpp"
@@ -14,8 +15,8 @@
 
 #define PCI_MGGC0 0x50
 
-static uint32_t get_gtt_size(void* device) {
-    uint16_t mggc0 = lil_pci_readw(device, PCI_MGGC0);
+static uint32_t get_gtt_size(Gpu *gpu) {
+    uint16_t mggc0 = gpu->pci_read<uint16_t>(PCI_MGGC0);
     uint8_t size = ((mggc0 >> 8) & 0b11);
     if(size == 3)
         lil_panic("Reserved GTT Size");
@@ -44,21 +45,21 @@ uint32_t *get_formats(struct LilGpu *gpu, size_t *num) {
     return supported_formats.data();
 }
 
-void lil_init_ivb_gpu(LilGpu* ret, void* device) {
+void lil_init_ivb_gpu(Gpu *ret) {
     ret->gpio_start = 0xC0000;
     uintptr_t base = 0;
     uintptr_t len = 0;
-    lil_get_bar(device, 0, &base, &len);
+    lil_get_bar(ret->dev, 0, &base, &len);
     ret->mmio_start = base;
 
     ret->gtt_address = ret->mmio_start + (len / 2); // Half of the BAR space is registers, half is GTT PTEs
-    ret->gtt_size = get_gtt_size(device);
+    ret->gtt_size = get_gtt_size(static_cast<Gpu *>(ret));
     ret->vmem_clear = lil_ivb_vmem_clear;
     ret->vmem_map = lil_ivb_vmem_map;
 
 	base = 0;
 	len = 0;
-    lil_get_bar(device, 2, &base, &len);
+    lil_get_bar(ret->dev, 2, &base, &len);
     ret->vram = base;
 
     //TODO currently we only support LVDS
