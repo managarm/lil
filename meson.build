@@ -73,10 +73,6 @@ util_vbt_sources = util_sources + files(
 	'utils/vbt/vbt.cpp',
 )
 
-util_watermarks_sources = util_sources + files(
-	'utils/watermarks/watermarks.cpp',
-)
-
 include_directories = include_directories('include')
 library = static_library('lil', sources, include_directories: include_directories, pic: false, install: true)
 lil_dep = declare_dependency(link_with: library, include_directories: include_directories)
@@ -88,10 +84,6 @@ endif
 
 if build_utils
 	util_vbt = executable('vbt', util_vbt_sources,
-        dependencies: lil_dep,
-        install: true
-    )
-	util_watermarks = executable('watermarks', util_watermarks_sources,
         dependencies: lil_dep,
         install: true
     )
