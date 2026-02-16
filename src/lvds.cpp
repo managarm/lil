@@ -1,5 +1,5 @@
-#include "src/lvds.h"
-#include "src/gmbus.h"
+#include "src/lvds.hpp"
+#include "src/gmbus.hpp"
 
 #include <lil/imports.h>
 

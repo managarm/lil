@@ -1,11 +1,12 @@
 #include <lil/imports.h>
 #include <lil/intel.h>
 
+#include "src/base.hpp"
 #include "src/dpcd.hpp"
 #include "src/kaby_lake/ddi.hpp"
 #include "src/kaby_lake/dp-aux.hpp"
 #include "src/kaby_lake/edp.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::edp {
 
@@ -47,8 +48,9 @@ bool aux_readable(LilGpu *gpu, LilConnector *con) {
 	return true;
 }
 
-bool pre_enable(LilGpu *gpu, LilConnector *con) {
+bool pre_enable(LilGpu *lil_gpu, LilConnector *con) {
 	LilEncoder *enc = con->encoder;
+	auto gpu = static_cast<Gpu *>(lil_gpu);
 
 	if((gpu->variant == ULT || gpu->variant == ULX) && con->ddi_id == DDI_D) {
 		lil_panic("unsupported eDP configuration");
@@ -76,13 +78,13 @@ bool pre_enable(LilGpu *gpu, LilConnector *con) {
 		}
 
 		REG(SHOTPLUG_CTL) = REG(SHOTPLUG_CTL);
-		uint32_t ref_div = 100 * gpu->ref_clock_freq;
+		uint32_t ref_div = 100 * gpu->ref_clock_freq.MHz();
 		REG(PP_OFF_DELAYS) = (enc->edp.t10 << 16) | (REG(PP_OFF_DELAYS) & 0xE000E000);
 		REG(PP_DIVISOR) = (enc->edp.t11_12 & 0xFF) | (((ref_div >> 1) - 1) << 8);
 		REG(PP_CONTROL) |= PP_CONTROL_RESET;
 
 		if(enc->edp.backlight_control_method_type == 2 && enc->edp.backlight_inverter_type == 2) {
-			uint32_t backlight_level = ((1000000 * gpu->ref_clock_freq) / enc->edp.pwm_inv_freq) >> 4;
+			uint32_t backlight_level = (gpu->ref_clock_freq.Hz() / enc->edp.pwm_inv_freq) >> 4;
 
 			if(backlight_level < 100) {
 				backlight_level = 100;

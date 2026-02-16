@@ -2,9 +2,10 @@
 #include <lil/intel.h>
 
 #include "src/avi.hpp"
-#include "src/edid.h"
-#include "src/gmbus.h"
-#include "src/helpers.h"
+#include "src/base.hpp"
+#include "src/edid.hpp"
+#include "src/gmbus.hpp"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/kaby_lake/crtc.hpp"
 #include "src/kaby_lake/ddi.hpp"
@@ -14,7 +15,7 @@
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/pll.hpp"
 #include "src/kaby_lake/transcoder.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::hdmi {
 
@@ -76,7 +77,9 @@ uint8_t HDMI_DDI_TRANS_TABLE[] = {
 
 } // namespace
 
-bool pre_enable(LilGpu *gpu, LilConnector *con) {
+bool pre_enable(LilGpu *lil_gpu, LilConnector *con) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	if(con->ddi_id == DDI_E || ddi_in_use_by_hdport(gpu, con->ddi_id))
 		return false;
 
@@ -202,7 +205,9 @@ uint32_t kbl_chicken_trans_reg_for_port(LilCrtc *crtc) {
 
 // TODO(CLEAN;BIT): this function needs to be cleaned up
 // 					specifically, we should be using enums or defines for this bit setting/clearing
-void commit_modeset(LilGpu *gpu, LilCrtc *crtc) {
+void commit_modeset(LilGpu *lil_gpu, LilCrtc *crtc) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	LilConnector *con = crtc->connector;
 
 	// TODO: we can't rely on this

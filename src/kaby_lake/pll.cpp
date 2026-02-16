@@ -5,7 +5,7 @@
 #include "src/kaby_lake/hdmi.hpp"
 #include "src/kaby_lake/pcode.hpp"
 #include "src/kaby_lake/pll.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace kbl::pll {
 

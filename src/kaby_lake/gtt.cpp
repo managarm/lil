@@ -1,7 +1,7 @@
 #include <lil/imports.h>
 
-#include "src/gtt.h"
-#include "src/helpers.h"
+#include "src/gtt.hpp"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/gtt.hpp"
 
 // TODO: Servers can support up to 46-bits, but I don't see a way to determine when it's the case.

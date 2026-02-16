@@ -3,12 +3,13 @@
 #include <lil/vbt.h>
 #include <lil/vbt-types.h>
 
+#include "src/base.hpp"
 #include "src/debug.hpp"
 #include "src/kaby_lake/encoder.hpp"
 #include "src/kaby_lake/hdmi.hpp"
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/dp.hpp"
-#include "src/pci.h"
+#include "src/pci.hpp"
 #include "src/vbt/opregion.hpp"
 #include "src/vbt/vbt.hpp"
 
@@ -16,8 +17,10 @@
 // TODO: vbt parsing should be generation independent
 //
 
-const struct vbt_header *lil_vbt_locate(LilGpu *gpu) {
-	uint32_t asls_phys = lil_pci_readd(gpu->dev, PCI_ASLS);
+const struct vbt_header *lil_vbt_locate(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
+	auto asls_phys = gpu->pci_read<uint32_t>(PCI_ASLS);
 	if(!asls_phys) {
 		lil_panic("ACPI OpRegion not supported");
 	}
@@ -78,8 +81,10 @@ const struct vbt_header *lil_vbt_locate(LilGpu *gpu) {
 	return vbt_header;
 }
 
-void vbt_init(LilGpu *gpu) {
-	gpu->vbt_header = lil_vbt_locate(gpu);
+void vbt_init(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
+	gpu->vbt_header = lil_vbt_locate(lil_gpu);
 	lil_log(VERBOSE, "lil: gpu->vbt_header addr 0x%lx\n", (uintptr_t) gpu->vbt_header);
 
 	const struct bdb_header *bdb_hdr = vbt_get_bdb_header(gpu->vbt_header);
@@ -134,7 +139,8 @@ enum LilAuxChannel vbt_parse_aux_channel(uint8_t aux_ch) {
 
 } // namespace
 
-void vbt_setup_children(LilGpu *gpu) {
+void vbt_setup_children(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
 	size_t con_id = 0;
 
 	const struct bdb_driver_features *driver_features = vbt_get_bdb_block<bdb_driver_features>(gpu->vbt_header);

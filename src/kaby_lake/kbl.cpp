@@ -3,6 +3,7 @@
 
 #include <array>
 
+#include "src/base.hpp"
 #include "src/debug.hpp"
 #include "src/kaby_lake/cdclk.hpp"
 #include "src/kaby_lake/dp.hpp"
@@ -14,12 +15,14 @@
 #include "src/kaby_lake/transcoder.hpp"
 #include "src/kaby_lake/pci.hpp"
 #include "src/kaby_lake/pcode.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 #include "src/vbt/vbt.hpp"
 
 namespace {
 
-void wm_latency_setup(LilGpu *gpu) {
+void wm_latency_setup(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	uint32_t data0 = 0;
 	uint32_t data1 = 0;
 	uint32_t timeout = 100;
@@ -36,7 +39,9 @@ void wm_latency_setup(LilGpu *gpu) {
 	}
 }
 
-void kbl_crtc_init(LilGpu *gpu, LilCrtc *crtc) {
+void kbl_crtc_init(LilGpu *lil_gpu, LilCrtc *crtc) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	enum LilPllId pll_id = INVALID_PLL;
 
 	if(crtc->connector->type != EDP) {
@@ -81,7 +86,9 @@ void kbl_crtc_init(LilGpu *gpu, LilCrtc *crtc) {
 
 namespace kbl {
 
-void init_gpu(LilGpu* gpu) {
+void init_gpu(LilGpu *lil_gpu) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	gpu->vmem_clear = kbl::gtt::vmem_clear;
 	gpu->vmem_map = kbl::gtt::vmem_map;
 

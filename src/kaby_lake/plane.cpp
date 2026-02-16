@@ -3,10 +3,11 @@
 #include <lil/fourcc.h>
 #include <lil/imports.h>
 
-#include "src/helpers.h"
+#include "src/base.hpp"
+#include "src/helpers.hpp"
 #include "src/kaby_lake/plane.hpp"
 #include "src/kaby_lake/watermarks.hpp"
-#include "src/regs.h"
+#include "src/regs.hpp"
 
 namespace {
 
@@ -42,7 +43,9 @@ uint32_t linetime_us(uint32_t pixel_clock, uint32_t htotal) {
 
 } // namespace
 
-void enable(LilGpu *gpu, LilCrtc *crtc, bool vblank_wait) {
+void enable(LilGpu *lil_gpu, LilCrtc *crtc, bool vblank_wait) {
+	auto gpu = static_cast<Gpu *>(lil_gpu);
+
 	uint32_t htotal = crtc->current_mode.htotal;
 	uint32_t pixel_clock = crtc->current_mode.clock;
 

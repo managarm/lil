@@ -1,6 +1,6 @@
 #include <lil/imports.h>
 
-#include "edid.h"
+#include "src/edid.hpp"
 
 void edid_timing_to_mode(DisplayData* edid, DetailTiming timing, LilModeInfo* mode) {
     mode->clock = timing.pixelClock * 10;
